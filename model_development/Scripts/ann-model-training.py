@@ -76,7 +76,7 @@ scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)  # Fit on training data only
 X_test = scaler.transform(X_test)        # Transform test data using training statistics
 # Save scaler for use in production (app.py)
-pickle.dump(scaler, open('../Models/scaler.pkl', 'wb'))
+pickle.dump(scaler, open('../../saved_models/scaler.pkl', 'wb'))
 
 # ========================= HANDLING CLASS IMBALANCE =========================
 
@@ -195,10 +195,10 @@ for epoch in range(500):
 model.load_state_dict(best_model_wts)
 
 # Save model architecture weights for deployment
-torch.save(model.state_dict(), '../Models/ann_model.pth')
+torch.save(model.state_dict(), '../../saved_models/ann_model.pth')
 
 # Save accuracy metric for display in web application
-pickle.dump(best_acc, open('../Models/ann_accuracy.pkl', 'wb'))
+pickle.dump(best_acc, open('../../saved_models/ann_accuracy.pkl', 'wb'))
 
 # Display final training results
 print(f"Best ANN Accuracy Achieved: {best_acc:.2f}%")
