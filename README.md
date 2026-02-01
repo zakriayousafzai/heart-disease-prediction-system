@@ -33,6 +33,7 @@ A comprehensive **Deep Learning-based Heart Disease Prediction System** that ana
   - [Random Forest Classifier](#random-forest-classifier)
   - [Logistic Regression](#logistic-regression)
 - [Dataset](#dataset)
+- [Data Insights & Visualizations](#data-insights--visualizations)
 - [Project Structure](#project-structure)
 - [Contributing](#contributing)
 - [License](#license)
@@ -424,6 +425,136 @@ The preprocessing pipeline ([`model_development/Scripts/preprocessing.py`](model
 2. **Categorical Encoding**: Label encoding for string variables
 3. **Missing Value Imputation**: KNN imputation (k=3) for cholesterol and resting BP values of 0
 4. **Data Type Optimization**: Convert appropriate columns to int32 for memory efficiency
+
+---
+
+## Data Insights & Visualizations
+
+The project includes comprehensive exploratory data analysis with visualizations generated using Plotly. All visualizations are available in the [`model_development/Visuals/`](model_development/Visuals/) directory.
+
+### Dataset Distribution
+
+Understanding the class balance in the dataset is crucial for model training:
+
+![Heart Disease Distribution](model_development/Visuals/heartDisease-distribution.png)
+
+*The pie chart shows the distribution of heart disease cases in the dataset. An imbalanced dataset requires special handling techniques like class weighting, which is implemented in the ANN training.*
+
+---
+
+### Feature Correlations with Heart Disease
+
+![Correlations with Heart Disease](model_development/Visuals/correlations-with-heart-disease.png)
+
+*This visualization shows Pearson correlation coefficients between each feature and the target variable (HeartDisease). Key insights:*
+- **Positive correlations** (higher values increase disease risk): Oldpeak, ST_Slope, ExerciseAngina, ChestPainType
+- **Negative correlations** (higher values decrease disease risk): MaxHR, Sex
+
+---
+
+### Demographic Analysis
+
+#### Age Distribution by Heart Disease Status
+
+![Age vs Heart Disease](model_development/Visuals/histogram-age-heartDisease.png)
+
+*Histogram showing age distribution segmented by heart disease status. The visualization reveals that heart disease prevalence increases with age, with patients aged 50-65 showing the highest risk.*
+
+---
+
+#### Sex Distribution
+
+![Sex vs Heart Disease](model_development/Visuals/histogram-sex-heartDisease.png)
+
+*Distribution of heart disease by biological sex (0=Male, 1=Female). Male patients in this dataset show a higher prevalence of heart disease.*
+
+---
+
+### Clinical Feature Analysis
+
+#### Chest Pain Type Distribution
+
+![Chest Pain Type vs Heart Disease](model_development/Visuals/histogram-chestPainType-heartDisease.png)
+
+*Distribution of chest pain types by disease status:*
+- **0 (ATA)**: Atypical Angina - Lower disease correlation
+- **1 (NAP)**: Non-Anginal Pain - Moderate disease correlation
+- **2 (ASY)**: Asymptomatic - **Highest disease correlation** (patients with no symptoms often have undetected heart disease)
+- **3 (TA)**: Typical Angina - Variable correlation
+
+---
+
+#### Exercise-Induced Angina
+
+![Exercise Angina vs Heart Disease](model_development/Visuals/histogram-excersiseAngina-heartDisease.png)
+
+*Exercise-induced angina (0=No, 1=Yes) is a strong predictor of heart disease. Patients experiencing chest pain during exercise have significantly higher disease rates.*
+
+---
+
+#### ST Slope Analysis
+
+![ST Slope vs Heart Disease](model_development/Visuals/histogram-ST_Slope-heartDisease.png)
+
+*The slope of the ST segment during peak exercise is a critical indicator:*
+- **0 (Upsloping)**: Generally indicates good cardiac health
+- **1 (Flat)**: Moderate risk indicator
+- **2 (Downsloping)**: **Strong indicator of heart disease** - used in high-risk classification
+
+---
+
+#### Fasting Blood Sugar
+
+![Fasting Blood Sugar vs Heart Disease](model_development/Visuals/histogram-fastingBS-heartDisease.png)
+
+*Fasting blood sugar above 120 mg/dl (1) shows correlation with heart disease, linking diabetes risk to cardiovascular health.*
+
+---
+
+### Continuous Variable Analysis
+
+#### Maximum Heart Rate Distribution
+
+![MaxHR Violin Plot](model_development/Visuals/violinPlot-maxHR-heartDisease.png)
+
+*Violin plot showing MaxHR distribution by disease status. Key insight: Patients with heart disease tend to have **lower maximum heart rates** during exercise testing, indicating reduced cardiovascular capacity.*
+
+---
+
+#### ST Depression (Oldpeak)
+
+![Oldpeak Violin Plot](model_development/Visuals/violinPlot-oldpeak-heartDisease.png)
+
+*Violin plot of Oldpeak (ST depression induced by exercise relative to rest):*
+- Patients **without** heart disease cluster around 0
+- Patients **with** heart disease show higher Oldpeak values
+- Values > 2.0 are used as a criterion for **High Risk** classification in the ANN model
+
+---
+
+### Hierarchical Visualizations
+
+#### Age Groups Sunburst Chart
+
+![Age Sunburst](model_development/Visuals/sunburstChart-age-heartDisease.png)
+
+*Hierarchical sunburst chart showing the relationship between heart disease status and age distribution. The inner ring represents disease status (0/1), and outer segments show age distributions within each group.*
+
+---
+
+#### Maximum Heart Rate Sunburst
+
+![MaxHR Sunburst](model_development/Visuals/sunburstChart-maxHR-heartDisease.png)
+
+*Sunburst visualization of maximum heart rate distributions segmented by disease status, providing a hierarchical view of how exercise capacity varies between healthy and diseased patients.*
+
+---
+
+#### Resting Blood Pressure Sunburst
+
+![Resting BP Sunburst](model_development/Visuals/sunburstChart-restingBP-heartDisease.png)
+
+*Hierarchical view of resting blood pressure distributions by heart disease status. While resting BP shows weaker correlation with heart disease compared to exercise metrics, extreme values still indicate increased risk.*
 
 ---
 
