@@ -35,6 +35,7 @@ A comprehensive **Deep Learning-based Heart Disease Prediction System** that ana
 - [Dataset](#dataset)
 - [Data Insights & Visualizations](#data-insights--visualizations)
 - [Project Structure](#project-structure)
+- [Developer Guides](#developer-guides)
 - [Contributing](#contributing)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
@@ -618,6 +619,33 @@ FYP/
     ├── rf_accuracy.pkl
     └── scaler.pkl
 ```
+
+---
+
+## Developer Guides
+
+For detailed developer documentation, refer to the following guides:
+
+| Guide | Location | Description |
+|-------|----------|-------------|
+| **API Documentation** | [`backend/API.md`](backend/API.md) | Complete REST API reference with endpoints, request/response formats, and examples |
+| **Model Development Guide** | [`model_development/README.md`](model_development/README.md) | Comprehensive guide for ML pipeline, training scripts, preprocessing, and dashboard |
+
+### Model Development Guide Highlights
+
+The [`model_development/README.md`](model_development/README.md) covers:
+
+- **Getting Started**: Environment setup and dependency installation
+- **Pipeline Workflow**: Step-by-step execution order with visual diagrams
+- **Script Documentation**: Detailed explanations for each Python script
+  - [`preprocessing.py`](model_development/Scripts/preprocessing.py) - Data cleaning and KNN imputation
+  - [`visualization.py`](model_development/Scripts/visualization.py) - EDA and chart generation
+  - [`ml-model-training.py`](model_development/Scripts/ml-model-training.py) - Logistic Regression & Random Forest training
+  - [`ann-model-training.py`](model_development/Scripts/ann-model-training.py) - PyTorch neural network training
+- **Streamlit Dashboard**: Interactive prediction interface documentation
+- **Dataset Reference**: Feature descriptions and encoding mappings
+- **Best Practices**: Guidelines for data preprocessing and model training
+- **Troubleshooting**: Common issues and solutions
 
 ---
 
