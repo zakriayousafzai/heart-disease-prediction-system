@@ -194,11 +194,11 @@ for epoch in range(500):
 # Load the best model weights found during training
 model.load_state_dict(best_model_wts)
 
+# Display final training results
+print(f"Best ANN Accuracy Achieved: {best_acc:.2f}%")
+
 # Save model architecture weights for deployment
 torch.save(model.state_dict(), '../../saved_models/ann_model.pth')
 
 # Save accuracy metric for display in web application
 pickle.dump(best_acc, open('../../saved_models/ann_accuracy.pkl', 'wb'))
-
-# Display final training results
-print(f"Best ANN Accuracy Achieved: {best_acc:.2f}%")
