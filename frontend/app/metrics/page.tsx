@@ -32,26 +32,35 @@ export default function Metrics(): JSX.Element {
   const [bestModel, setBestModel] = useState<string>("");
 
   useEffect(() => {
-    fetch("http://localhost:5000/metrics")
-      .then((res) => res.json())
-      .then((data: MetricsData) => {
+    const fetchMetrics = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/metrics");
+        const data: MetricsData = await res.json();
         setMetrics(data);
 
-        // Find best model automatically
-        const maxVal = Math.max(data.ann, data.rf, data.lr);
-        const best =
-          maxVal === data.ann
-            ? "ANN"
-            : maxVal === data.rf
-            ? "Random Forest"
-            : "Logistic Regression";
+        const entries = Object.entries(data);
+        const [bestKey] = entries.reduce(
+          (prev, curr) => (curr[1] > prev[1] ? curr : prev),
+          ["", -Infinity]
+        );
 
-        setBestModel(best);
-      });
+        const modelNames: Record<string, string> = {
+          ann: "ANN",
+          rf: "Random Forest",
+          lr: "Logistic Regression",
+        };
+
+        setBestModel(modelNames[bestKey] || "");
+      } catch (err) {
+        console.error("Error fetching metrics:", err);
+      }
+    };
+
+    fetchMetrics();
   }, []);
 
   if (!metrics) {
-    return <p className="text-center mt-10">Loading metrics...</p>;
+    return <p className="text-center mt-10 text-gray-500">Loading metrics...</p>;
   }
 
   const chartData = {
@@ -59,12 +68,9 @@ export default function Metrics(): JSX.Element {
     datasets: [
       {
         label: "Accuracy (%)",
-        data: [
-          metrics.ann * 100,
-          metrics.rf * 100,
-          metrics.lr * 100,
-        ],
+        data: [metrics.ann * 100, metrics.rf * 100, metrics.lr * 100],
         backgroundColor: ["#3b82f6", "#22c55e", "#f97316"],
+        borderRadius: 6,
       },
     ],
   };
@@ -77,48 +83,41 @@ export default function Metrics(): JSX.Element {
 
       {/* 📱 Responsive Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <MetricCard
-          title="ANN"
-          value={metrics.ann}
-          best={bestModel === "ANN"}
-        />
-        <MetricCard
-          title="Random Forest"
-          value={metrics.rf}
-          best={bestModel === "Random Forest"}
-        />
-        <MetricCard
-          title="Logistic Regression"
-          value={metrics.lr}
-          best={bestModel === "Logistic Regression"}
-        />
+        {Object.entries(metrics).map(([key, value]) => {
+          const modelNames: Record<string, string> = {
+            ann: "ANN",
+            rf: "Random Forest",
+            lr: "Logistic Regression",
+          };
+          return (
+            <MetricCard
+              key={key}
+              title={modelNames[key]}
+              value={value}
+              best={bestModel === modelNames[key]}
+            />
+          );
+        })}
       </div>
 
       {/* 📊 Bar Chart */}
-      <div className="bg-white p-4 rounded shadow">
-        <Bar data={chartData} />
+      <div className="bg-white p-4 rounded-xl shadow-md">
+        <Bar data={chartData} options={{ responsive: true }} />
       </div>
     </div>
   );
 }
 
 /* ---------- Metric Card ---------- */
-function MetricCard({
-  title,
-  value,
-  best,
-}: MetricCardProps): JSX.Element {
+function MetricCard({ title, value, best }: MetricCardProps): JSX.Element {
   return (
     <div
-      className={`p-4 rounded shadow text-center border-2 ${
+      className={`p-5 rounded-xl shadow-md text-center border-2 transition-transform duration-200 hover:scale-105 ${
         best ? "border-green-500 bg-green-50" : "border-gray-200"
       }`}
     >
       <h3 className="text-lg font-semibold">{title}</h3>
-      <p className="text-2xl font-bold mt-2">
-        {(value * 100).toFixed(2)}%
-      </p>
-
+      <p className="text-2xl font-bold mt-2">{(value * 100).toFixed(2)}%</p>
       {best && (
         <span className="inline-block mt-2 text-green-600 font-semibold">
           🟢 Best Model
