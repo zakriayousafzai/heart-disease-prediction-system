@@ -68,7 +68,7 @@ export default function Metrics(): JSX.Element {
     datasets: [
       {
         label: "Accuracy (%)",
-        data: [metrics.ann * 100, metrics.rf * 100, metrics.lr * 100],
+        data: [metrics.ann, metrics.rf, metrics.lr],
         backgroundColor: ["#3b82f6", "#22c55e", "#f97316"],
         borderRadius: 6,
       },
@@ -117,7 +117,7 @@ function MetricCard({ title, value, best }: MetricCardProps): JSX.Element {
       }`}
     >
       <h3 className="text-lg font-semibold">{title}</h3>
-      <p className="text-2xl font-bold mt-2">{(value * 100).toFixed(2)}%</p>
+      <p className="text-2xl font-bold mt-2">{(value).toFixed(2)}%</p>
       {best && (
         <span className="inline-block mt-2 text-green-600 font-semibold">
           🟢 Best Model
