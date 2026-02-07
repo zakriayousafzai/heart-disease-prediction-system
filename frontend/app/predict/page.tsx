@@ -3,6 +3,35 @@
 import { useState } from "react";
 import axios from "axios";
 
+interface RiskFactor {
+  feature: string;
+  value: string;
+  impact: string;
+  impact_score: number;
+  direction: string;
+  description: string;
+}
+
+interface Recommendation {
+  category: string;
+  icon: string;
+  title: string;
+  description: string;
+  priority: string;
+}
+
+interface PredictionResult {
+  ann_prediction: {
+    result: string;
+    probability: number;
+  };
+  rf_prediction: string;
+  lr_prediction: string;
+  id: number;
+  risk_factors?: RiskFactor[];
+  recommendations?: Recommendation[];
+}
+
 export default function PredictPage() {
   const [form, setForm] = useState({
     age: "",
@@ -18,7 +47,7 @@ export default function PredictPage() {
     st_slope: "Upsloping",
   });
 
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<PredictionResult | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (
@@ -54,9 +83,55 @@ export default function PredictPage() {
     }
   };
 
+  const getImpactColor = (impact: string) => {
+    switch (impact) {
+      case "high":
+        return "text-red-600";
+      case "medium":
+        return "text-yellow-600";
+      case "low":
+        return "text-green-600";
+      default:
+        return "text-gray-600";
+    }
+  };
+
+  const getImpactIcon = (impact: string, direction: string) => {
+    if (direction === "decreases risk") return "✅";
+    switch (impact) {
+      case "high":
+        return "🔴";
+      case "medium":
+        return "🟡";
+      case "low":
+        return "🟢";
+      default:
+        return "⚪";
+    }
+  };
+
+  const getPriorityBadgeColor = (priority: string) => {
+    switch (priority) {
+      case "high":
+        return "bg-red-100 text-red-800 border-red-300";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800 border-yellow-300";
+      case "low":
+        return "bg-green-100 text-green-800 border-green-300";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-300";
+    }
+  };
+
+  const getRiskLevelColor = (result: string) => {
+    if (result.includes("High")) return "bg-red-50 border-red-200";
+    if (result.includes("Medium")) return "bg-yellow-50 border-yellow-200";
+    return "bg-green-50 border-green-200";
+  };
+
   return (
-    <div className="min-h-screen bg-linear-to-br from-red-50 to-gray-100 flex justify-center items-center p-4">
-      <div className="bg-white w-full max-w-4xl rounded-2xl shadow-lg p-6 md:p-10">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 to-gray-100 flex justify-center items-start p-4 py-8">
+      <div className="bg-white w-full max-w-6xl rounded-2xl shadow-lg p-6 md:p-10">
         <h1 className="text-3xl font-bold text-center text-red-600 mb-2">
           🫀 Heart Disease Prediction
         </h1>
@@ -228,6 +303,7 @@ export default function PredictPage() {
           <button
             type="submit"
             className="md:col-span-2 mt-4 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl text-lg font-semibold transition"
+            disabled={loading}
           >
             {loading ? "🔍 Analyzing..." : "❤️ Predict Heart Risk"}
           </button>
@@ -235,12 +311,149 @@ export default function PredictPage() {
 
         {/* Result */}
         {result && (
-          <div className="mt-8 bg-green-50 border border-green-200 rounded-xl p-5">
-            <h2 className="text-xl font-bold mb-3">📊 Prediction Result</h2>
-            <p><b>ANN Risk:</b> {result.ann_prediction.result}</p>
-            <p><b>Probability:</b> {result.ann_prediction.probability}%</p>
-            <p><b>Random Forest:</b> {result.rf_prediction}</p>
-            <p><b>Logistic Regression:</b> {result.lr_prediction}</p>
+          <div className="mt-8 space-y-6">
+            {/* Prediction Summary */}
+            <div
+              className={`border rounded-xl p-5 ${getRiskLevelColor(
+                result.ann_prediction.result
+              )}`}
+            >
+              <h2 className="text-xl font-bold mb-3">📊 Prediction Result</h2>
+              <div className="space-y-2">
+                <p>
+                  <b>ANN Risk Level:</b> {result.ann_prediction.result}
+                </p>
+                <p>
+                  <b>Confidence:</b> {result.ann_prediction.probability}%
+                </p>
+                <p>
+                  <b>Random Forest:</b> {result.rf_prediction}
+                </p>
+                <p>
+                  <b>Logistic Regression:</b> {result.lr_prediction}
+                </p>
+              </div>
+            </div>
+
+            {/* Risk Factors Section */}
+            {result.risk_factors && result.risk_factors.length > 0 && (
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
+                <h2 className="text-xl font-bold mb-4 text-blue-900">
+                  📋 Why This Prediction?
+                </h2>
+                <p className="text-sm text-blue-800 mb-4">
+                  These are the top contributing factors based on your clinical data:
+                </p>
+                <div className="space-y-4">
+                  {result.risk_factors.map((factor, idx) => (
+                    <div
+                      key={idx}
+                      className="bg-white rounded-lg p-4 border border-blue-100"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">
+                            {getImpactIcon(factor.impact, factor.direction)}
+                          </span>
+                          <div>
+                            <span className="font-semibold text-gray-800">
+                              {factor.feature}
+                            </span>
+                            <span className="text-gray-600 ml-2">
+                              ({factor.value})
+                            </span>
+                          </div>
+                        </div>
+                        <span
+                          className={`text-sm font-medium capitalize ${getImpactColor(
+                            factor.impact
+                          )}`}
+                        >
+                          {factor.impact} Impact
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-700 mb-2">
+                        {factor.description}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
+                          <div
+                            className={`h-full ${
+                              factor.direction === "increases risk"
+                                ? "bg-red-500"
+                                : "bg-green-500"
+                            }`}
+                            style={{
+                              width: `${Math.min(
+                                factor.impact_score * 100,
+                                100
+                              )}%`,
+                            }}
+                          ></div>
+                        </div>
+                        <span className="text-xs text-gray-500">
+                          {factor.direction}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recommendations Section */}
+            {result.recommendations && result.recommendations.length > 0 && (
+              <div className="bg-purple-50 border border-purple-200 rounded-xl p-5">
+                <h2 className="text-xl font-bold mb-4 text-purple-900">
+                  💡 How to Lower Your Risk
+                </h2>
+                <p className="text-sm text-purple-800 mb-4">
+                  Personalized recommendations based on your risk factors:
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {result.recommendations.map((rec, idx) => (
+                    <div
+                      key={idx}
+                      className="bg-white rounded-lg p-4 border border-purple-100 flex flex-col"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <span className="text-3xl">{rec.icon}</span>
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full border font-medium ${getPriorityBadgeColor(
+                            rec.priority
+                          )}`}
+                        >
+                          {rec.priority.toUpperCase()}
+                        </span>
+                      </div>
+                      <h3 className="font-semibold text-gray-800 mb-2">
+                        {rec.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 flex-1">
+                        {rec.description}
+                      </p>
+                      <div className="mt-3 pt-3 border-t border-gray-100">
+                        <span className="text-xs text-gray-500 capitalize">
+                          {rec.category} Recommendation
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Medical Disclaimer */}
+            <div className="bg-gray-100 border border-gray-300 rounded-lg p-4 text-sm text-gray-700">
+              <p className="font-semibold mb-1">⚠️ Medical Disclaimer</p>
+              <p>
+                This prediction is generated by AI models and is for
+                informational purposes only. It is not a substitute for
+                professional medical advice, diagnosis, or treatment. Always
+                consult with a qualified healthcare provider for medical
+                concerns.
+              </p>
+            </div>
           </div>
         )}
       </div>

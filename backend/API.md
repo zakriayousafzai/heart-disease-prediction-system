@@ -24,9 +24,30 @@ http://localhost:5000
 
 - **Framework**: Flask 3.1.2
 - **Database**: PostgreSQL (via Flask-SQLAlchemy)
-- **ML Libraries**: PyTorch 2.10.0, scikit-learn 1.8.0
+- **ML Libraries**: PyTorch 2.10.0, scikit-learn 1.8.0, SHAP 0.46.0
 - **Data Processing**: pandas 3.0.0, NumPy 2.4.1
 - **CORS**: flask-cors 6.0.2
+- **Explainability**: SHAP (SHapley Additive exPlanations) for model interpretability
+- **AI Recommendations**: Google Gemini 2.5 Flash (via google-generativeai)
+
+### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GEMINI_API_KEY` | Yes (for AI recommendations) | Google Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey). If not set, recommendations will not be generated. |
+
+**Setting the API key:**
+
+```bash
+# Windows (cmd)
+set GEMINI_API_KEY=your_api_key_here
+
+# Windows (PowerShell)
+$env:GEMINI_API_KEY="your_api_key_here"
+
+# Linux/macOS
+export GEMINI_API_KEY=your_api_key_here
+```
 
 ---
 
@@ -54,7 +75,9 @@ Heart Disease Risk Prediction API is Running.
 
 ### 2. Predict Heart Disease Risk
 
-Submit patient clinical data to receive heart disease risk predictions from all three models.
+Submit patient clinical data to receive heart disease risk predictions from all three models, along with explainability data (risk factors) and personalized health recommendations.
+
+**New in v2.0:** This endpoint now includes SHAP-based explainability showing which clinical features contributed most to the prediction, and generates personalized recommendations for risk reduction.
 
 ```http
 POST /predict
@@ -114,7 +137,56 @@ POST /predict
   },
   "rf_prediction": "Heart Disease Detected",
   "lr_prediction": "Heart Disease Detected",
-  "id": 123
+  "id": 123,
+  "risk_factors": [
+    {
+      "feature": "Cholesterol",
+      "value": "250 mg/dl",
+      "impact": "high",
+      "impact_score": 0.35,
+      "direction": "increases risk",
+      "description": "Cholesterol level of 250 mg/dl is high"
+    },
+    {
+      "feature": "ST Slope",
+      "value": "Flat",
+      "impact": "high",
+      "impact_score": 0.28,
+      "direction": "increases risk",
+      "description": "ST slope is Flat (concerning pattern)"
+    },
+    {
+      "feature": "Exercise Angina",
+      "value": "Yes",
+      "impact": "medium",
+      "impact_score": 0.22,
+      "direction": "increases risk",
+      "description": "Exercise-induced angina present"
+    }
+  ],
+  "recommendations": [
+    {
+      "category": "dietary",
+      "icon": "🥗",
+      "title": "Lower Your Cholesterol",
+      "description": "Your cholesterol level is 250 mg/dl, which is above the recommended range (< 200 mg/dl). Consider reducing saturated fats, increasing fiber intake with whole grains and vegetables, and adding omega-3 rich foods like fish to your diet.",
+      "priority": "high"
+    },
+    {
+      "category": "medical",
+      "icon": "🏥",
+      "title": "Cardiology Consultation Required",
+      "description": "Your ECG shows concerning patterns (ST depression: 1.5, ST slope: Flat). These indicate potential cardiac ischemia and require detailed cardiac evaluation including stress testing or coronary angiography.",
+      "priority": "high"
+    },
+    {
+      "category": "lifestyle",
+      "icon": "🏃",
+      "title": "Improve Cardiovascular Fitness",
+      "description": "Regular moderate aerobic exercise (walking, swimming, cycling) can improve heart rate response and overall cardiovascular health. Start slowly and gradually increase intensity.",
+      "priority": "medium"
+    }
+  ]
 }
 ```
 
@@ -127,6 +199,10 @@ POST /predict
 | `rf_prediction` | string | Random Forest prediction: `"Heart Disease Detected"` or `"No Heart Disease Detected"` |
 | `lr_prediction` | string | Logistic Regression prediction: `"Heart Disease Detected"` or `"No Heart Disease Detected"` |
 | `id` | integer | Database ID of the saved patient record |
+| `risk_factors` | array | **(Optional)** Top 5 contributing risk factors based on SHAP analysis. Each factor includes:<br>- `feature`: Feature name (e.g., "Cholesterol")<br>- `value`: Formatted value (e.g., "250 mg/dl")<br>- `impact`: Impact level (`"high"`, `"medium"`, or `"low"`)<br>- `impact_score`: Numerical SHAP importance score (0-1+)<br>- `direction`: `"increases risk"` or `"decreases risk"`<br>- `description`: Human-readable explanation |
+| `recommendations` | array | **(Optional)** AI-generated personalized health recommendations powered by **Google Gemini 2.0 Flash**. The AI receives patient data, prediction results, and SHAP risk factors as context for generating highly personalized advice. Each recommendation includes:<br>- `category`: Type (`"dietary"`, `"medical"`, or `"lifestyle"`)<br>- `icon`: Emoji icon for visual representation<br>- `title`: Recommendation title<br>- `description`: Detailed actionable advice (AI-generated, personalized to patient)<br>- `priority`: Priority level (`"high"`, `"medium"`, or `"low"`) |
+
+**Note:** The `risk_factors` field requires SHAP explainer initialization. The `recommendations` field requires Google Gemini AI (`GEMINI_API_KEY` must be set). If SHAP or Gemini are unavailable, the prediction is still returned without these optional fields.
 
 #### Error Response
 
