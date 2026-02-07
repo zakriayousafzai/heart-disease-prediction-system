@@ -130,7 +130,7 @@ export default function PredictPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-gray-100 flex justify-center items-start p-4 py-8">
+    <div className="min-h-screen bg-linear-to-br from-red-50 to-gray-100 flex justify-center items-start p-4 py-8">
       <div className="bg-white w-full max-w-6xl rounded-2xl shadow-lg p-6 md:p-10">
         <h1 className="text-3xl font-bold text-center text-red-600 mb-2">
           🫀 Heart Disease Prediction
