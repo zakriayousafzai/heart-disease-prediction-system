@@ -51,13 +51,14 @@ export default function PredictPage() {
   const [loading, setLoading] = useState(false);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setResult(null);
     setLoading(true);
 
     try {
@@ -123,6 +124,22 @@ export default function PredictPage() {
     }
   };
 
+  const handleExample = () => {
+    setForm({
+      age: "60",
+      sex: "Male",
+      chest_pain_type: "Non-anginal Pain",
+      resting_bp: "100",
+      cholesterol: "90",
+      fasting_bs: "<= 120 mg/dl",
+      resting_ecg: "Left Ventricular Hypertrophy",
+      max_hr: "110",
+      exercise_angina: "Yes",
+      oldpeak: "1",
+      st_slope: "Flat",
+    });
+  };
+
   return (
     <div className="min-h-screen flex justify-center items-start p-4 py-8">
       <div className="w-full max-w-6xl rounded-2xl shadow-xl p-6 md:p-10 bg-black/10 backdrop-blur-md border border-white/20">
@@ -132,6 +149,16 @@ export default function PredictPage() {
         <p className="text-center text-brand-fg/80 mb-8">
           Please fill the form carefully. All fields are required.
         </p>
+
+        <div>
+          <button
+            type="button"
+            onClick={()=> handleExample()}
+            className="mb-4 bg-brand-fg hover:bg-brand-fg/90 text-brand-bg py-2 px-4 rounded-lg text-sm transition"
+          >
+            Load Example Data
+          </button>
+        </div>
 
         <form
           onSubmit={handleSubmit}
@@ -143,6 +170,7 @@ export default function PredictPage() {
             <input
               type="number"
               name="age"
+              value={form.age}
               className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
               placeholder="e.g. 55"
               required
@@ -157,6 +185,7 @@ export default function PredictPage() {
               name="sex"
               className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
               onChange={handleChange}
+              value={form.sex}
             >
               <option className="bg-brand-fg text-brand-bg">Male</option>
               <option className="bg-brand-fg text-brand-bg">Female</option>
@@ -170,11 +199,20 @@ export default function PredictPage() {
               name="chest_pain_type"
               className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
               onChange={handleChange}
+              value={form.chest_pain_type}
             >
-              <option className="bg-brand-fg text-brand-bg">Typical Angina</option>
-              <option className="bg-brand-fg text-brand-bg">Atypical Angina</option>
-              <option className="bg-brand-fg text-brand-bg">Non-anginal Pain</option>
-              <option className="bg-brand-fg text-brand-bg">Asymptomatic</option>
+              <option className="bg-brand-fg text-brand-bg">
+                Typical Angina
+              </option>
+              <option className="bg-brand-fg text-brand-bg">
+                Atypical Angina
+              </option>
+              <option className="bg-brand-fg text-brand-bg">
+                Non-anginal Pain
+              </option>
+              <option className="bg-brand-fg text-brand-bg">
+                Asymptomatic
+              </option>
             </select>
           </div>
 
@@ -190,6 +228,7 @@ export default function PredictPage() {
               placeholder="e.g. 140 mmHg"
               required
               onChange={handleChange}
+              value={form.resting_bp}
             />
           </div>
 
@@ -203,6 +242,7 @@ export default function PredictPage() {
               placeholder="e.g. 240 mg/dl"
               required
               onChange={handleChange}
+              value={form.cholesterol}
             />
           </div>
 
@@ -215,9 +255,14 @@ export default function PredictPage() {
               name="fasting_bs"
               className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
               onChange={handleChange}
+              value={form.fasting_bs}
             >
-              <option className="bg-brand-fg text-brand-bg">{'<= 120 mg/dl'}</option>
-              <option className="bg-brand-fg text-brand-bg">{'> 120 mg/dl'}</option>
+              <option className="bg-brand-fg text-brand-bg">
+                {"<= 120 mg/dl"}
+              </option>
+              <option className="bg-brand-fg text-brand-bg">
+                {"> 120 mg/dl"}
+              </option>
             </select>
           </div>
 
@@ -228,18 +273,21 @@ export default function PredictPage() {
               name="resting_ecg"
               className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
               onChange={handleChange}
+              value={form.resting_ecg}
             >
               <option className="bg-brand-fg text-brand-bg">Normal</option>
-              <option className="bg-brand-fg text-brand-bg">ST-T wave Abnormality</option>
-              <option className="bg-brand-fg text-brand-bg">Left Ventricular Hypertrophy</option>
+              <option className="bg-brand-fg text-brand-bg">
+                ST-T wave Abnormality
+              </option>
+              <option className="bg-brand-fg text-brand-bg">
+                Left Ventricular Hypertrophy
+              </option>
             </select>
           </div>
 
           {/* Max HR */}
           <div>
-            <label className="block font-medium mb-1">
-              Maximum Heart Rate
-            </label>
+            <label className="block font-medium mb-1">Maximum Heart Rate</label>
             <input
               type="number"
               name="max_hr"
@@ -247,6 +295,7 @@ export default function PredictPage() {
               placeholder="e.g. 160"
               required
               onChange={handleChange}
+              value={form.max_hr}
             />
           </div>
 
@@ -259,6 +308,7 @@ export default function PredictPage() {
               name="exercise_angina"
               className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
               onChange={handleChange}
+              value={form.exercise_angina}
             >
               <option className="bg-brand-fg text-brand-bg">No</option>
               <option className="bg-brand-fg text-brand-bg">Yes</option>
@@ -276,6 +326,7 @@ export default function PredictPage() {
               placeholder="e.g. 1.5"
               required
               onChange={handleChange}
+              value={form.oldpeak}
             />
           </div>
 
@@ -286,6 +337,7 @@ export default function PredictPage() {
               name="st_slope"
               className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
               onChange={handleChange}
+              value={form.st_slope}
             >
               <option className="bg-brand-fg text-brand-bg">Upsloping</option>
               <option className="bg-brand-fg text-brand-bg">Flat</option>
@@ -307,9 +359,7 @@ export default function PredictPage() {
         {result && (
           <div className="mt-8 space-y-6">
             {/* Prediction Summary */}
-            <div
-              className={`border rounded-xl p-5 bg-brand-fg`}
-            >
+            <div className={`border rounded-xl p-5 bg-brand-fg`}>
               <h2 className="text-xl font-bold mb-3">📊 Prediction Result</h2>
               <div className="space-y-2">
                 <p>
@@ -334,7 +384,8 @@ export default function PredictPage() {
                   📋 Why This Prediction?
                 </h2>
                 <p className="text-sm text-blue-800 mb-4">
-                  These are the top contributing factors based on your clinical data:
+                  These are the top contributing factors based on your clinical
+                  data:
                 </p>
                 <div className="space-y-4">
                   {result.risk_factors.map((factor, idx) => (
@@ -358,7 +409,7 @@ export default function PredictPage() {
                         </div>
                         <span
                           className={`text-sm font-medium capitalize ${getImpactColor(
-                            factor.impact
+                            factor.impact,
                           )}`}
                         >
                           {factor.impact} Impact
@@ -378,7 +429,7 @@ export default function PredictPage() {
                             style={{
                               width: `${Math.min(
                                 factor.impact_score * 100,
-                                100
+                                100,
                               )}%`,
                             }}
                           ></div>
@@ -412,7 +463,7 @@ export default function PredictPage() {
                         <span className="text-3xl">{rec.icon}</span>
                         <span
                           className={`text-xs px-2 py-1 rounded-full border font-medium ${getPriorityBadgeColor(
-                            rec.priority
+                            rec.priority,
                           )}`}
                         >
                           {rec.priority.toUpperCase()}
