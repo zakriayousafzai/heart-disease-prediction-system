@@ -5,6 +5,20 @@
   --color-brand-fg: #f7f4f3;
 }
 
+@layer base {
+  /* Remove arrows for Firefox */
+  input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  /* Remove arrows for Chrome, Safari, and Edge */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
 
 body {
   background: #5b2333;
