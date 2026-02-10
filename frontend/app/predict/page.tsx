@@ -123,15 +123,9 @@ export default function PredictPage() {
     }
   };
 
-  const getRiskLevelColor = (result: string) => {
-    if (result.includes("High")) return "bg-red-50 border-red-200";
-    if (result.includes("Medium")) return "bg-yellow-50 border-yellow-200";
-    return "bg-green-50 border-green-200";
-  };
-
   return (
     <div className="min-h-screen flex justify-center items-start p-4 py-8">
-      <div className="w-full max-w-6xl rounded-2xl shadow-xl p-6 md:p-10 bg-white/10 backdrop-blur-md border border-white/20">
+      <div className="w-full max-w-6xl rounded-2xl shadow-xl p-6 md:p-10 bg-black/10 backdrop-blur-md border border-white/20">
         <h1 className="text-3xl font-bold text-center text-brand-fg mb-2">
           Heart Disease Prediction
         </h1>
@@ -302,7 +296,7 @@ export default function PredictPage() {
           {/* Submit */}
           <button
             type="submit"
-            className="md:col-span-2 mt-4 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl text-lg font-semibold transition"
+            className="md:col-span-2 mt-4 bg-brand-fg hover:bg-brand-fg/90 text-brand-bg py-3 rounded-xl text-lg font-semibold transition"
             disabled={loading}
           >
             {loading ? "🔍 Analyzing..." : "❤️ Predict Heart Risk"}
@@ -314,9 +308,7 @@ export default function PredictPage() {
           <div className="mt-8 space-y-6">
             {/* Prediction Summary */}
             <div
-              className={`border rounded-xl p-5 ${getRiskLevelColor(
-                result.ann_prediction.result
-              )}`}
+              className={`border rounded-xl p-5 bg-brand-fg`}
             >
               <h2 className="text-xl font-bold mb-3">📊 Prediction Result</h2>
               <div className="space-y-2">
