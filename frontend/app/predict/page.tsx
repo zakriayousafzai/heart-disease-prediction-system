@@ -131,17 +131,17 @@ export default function PredictPage() {
 
   return (
     <div className="min-h-screen flex justify-center items-start p-4 py-8">
-      <div className="bg-white w-full max-w-6xl rounded-2xl shadow-lg p-6 md:p-10">
-        <h1 className="text-3xl font-bold text-center text-red-600 mb-2">
-          🫀 Heart Disease Prediction
+      <div className="w-full max-w-6xl rounded-2xl shadow-xl p-6 md:p-10 bg-white/10 backdrop-blur-md border border-white/20">
+        <h1 className="text-3xl font-bold text-center text-brand-fg mb-2">
+          Heart Disease Prediction
         </h1>
-        <p className="text-center text-gray-600 mb-8">
+        <p className="text-center text-brand-fg/80 mb-8">
           Please fill the form carefully. All fields are required.
         </p>
 
         <form
           onSubmit={handleSubmit}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 text-brand-fg"
         >
           {/* Age */}
           <div>
@@ -149,7 +149,7 @@ export default function PredictPage() {
             <input
               type="number"
               name="age"
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-red-500 focus:outline-none"
+              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
               placeholder="e.g. 55"
               required
               onChange={handleChange}
@@ -161,11 +161,11 @@ export default function PredictPage() {
             <label className="block font-medium mb-1">Gender</label>
             <select
               name="sex"
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 bg-white focus:ring-2 focus:ring-red-500"
+              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
               onChange={handleChange}
             >
-              <option>Male</option>
-              <option>Female</option>
+              <option className="bg-brand-fg text-brand-bg">Male</option>
+              <option className="bg-brand-fg text-brand-bg">Female</option>
             </select>
           </div>
 
@@ -174,13 +174,13 @@ export default function PredictPage() {
             <label className="block font-medium mb-1">Chest Pain Type</label>
             <select
               name="chest_pain_type"
-              className="w-full rounded-lg border border-gray-300 px-4 py-2"
+              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
               onChange={handleChange}
             >
-              <option>Typical Angina</option>
-              <option>Atypical Angina</option>
-              <option>Non-anginal Pain</option>
-              <option>Asymptomatic</option>
+              <option className="bg-brand-fg text-brand-bg">Typical Angina</option>
+              <option className="bg-brand-fg text-brand-bg">Atypical Angina</option>
+              <option className="bg-brand-fg text-brand-bg">Non-anginal Pain</option>
+              <option className="bg-brand-fg text-brand-bg">Asymptomatic</option>
             </select>
           </div>
 
@@ -192,7 +192,7 @@ export default function PredictPage() {
             <input
               type="number"
               name="resting_bp"
-              className="w-full rounded-lg border border-gray-300 px-4 py-2"
+              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
               placeholder="e.g. 140 mmHg"
               required
               onChange={handleChange}
@@ -205,7 +205,7 @@ export default function PredictPage() {
             <input
               type="number"
               name="cholesterol"
-              className="w-full rounded-lg border border-gray-300 px-4 py-2"
+              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
               placeholder="e.g. 240 mg/dl"
               required
               onChange={handleChange}
@@ -219,11 +219,11 @@ export default function PredictPage() {
             </label>
             <select
               name="fasting_bs"
-              className="w-full rounded-lg border border-gray-300 px-4 py-2"
+              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
               onChange={handleChange}
             >
-              <option>{'<= 120 mg/dl'}</option>
-              <option>{'> 120 mg/dl'}</option>
+              <option className="bg-brand-fg text-brand-bg">{'<= 120 mg/dl'}</option>
+              <option className="bg-brand-fg text-brand-bg">{'> 120 mg/dl'}</option>
             </select>
           </div>
 
@@ -232,12 +232,12 @@ export default function PredictPage() {
             <label className="block font-medium mb-1">Resting ECG</label>
             <select
               name="resting_ecg"
-              className="w-full rounded-lg border border-gray-300 px-4 py-2"
+              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
               onChange={handleChange}
             >
-              <option>Normal</option>
-              <option>ST-T wave Abnormality</option>
-              <option>Left Ventricular Hypertrophy</option>
+              <option className="bg-brand-fg text-brand-bg">Normal</option>
+              <option className="bg-brand-fg text-brand-bg">ST-T wave Abnormality</option>
+              <option className="bg-brand-fg text-brand-bg">Left Ventricular Hypertrophy</option>
             </select>
           </div>
 
@@ -249,7 +249,7 @@ export default function PredictPage() {
             <input
               type="number"
               name="max_hr"
-              className="w-full rounded-lg border border-gray-300 px-4 py-2"
+              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
               placeholder="e.g. 160"
               required
               onChange={handleChange}
@@ -263,11 +263,11 @@ export default function PredictPage() {
             </label>
             <select
               name="exercise_angina"
-              className="w-full rounded-lg border border-gray-300 px-4 py-2"
+              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
               onChange={handleChange}
             >
-              <option>No</option>
-              <option>Yes</option>
+              <option className="bg-brand-fg text-brand-bg">No</option>
+              <option className="bg-brand-fg text-brand-bg">Yes</option>
             </select>
           </div>
 
@@ -278,7 +278,7 @@ export default function PredictPage() {
               type="number"
               step="0.1"
               name="oldpeak"
-              className="w-full rounded-lg border border-gray-300 px-4 py-2"
+              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
               placeholder="e.g. 1.5"
               required
               onChange={handleChange}
@@ -290,12 +290,12 @@ export default function PredictPage() {
             <label className="block font-medium mb-1">ST Slope</label>
             <select
               name="st_slope"
-              className="w-full rounded-lg border border-gray-300 px-4 py-2"
+              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
               onChange={handleChange}
             >
-              <option>Upsloping</option>
-              <option>Flat</option>
-              <option>Downsloping</option>
+              <option className="bg-brand-fg text-brand-bg">Upsloping</option>
+              <option className="bg-brand-fg text-brand-bg">Flat</option>
+              <option className="bg-brand-fg text-brand-bg">Downsloping</option>
             </select>
           </div>
 
