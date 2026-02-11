@@ -104,7 +104,7 @@ export default function Metrics(): JSX.Element {
       </div>
 
       {/* 📊 Bar Chart */}
-      <div className="bg-black/10 backdrop-blur-md border border-white/20 p-4 rounded-xl shadow-md">
+      <div className="bg-black/15 backdrop-blur-md border border-white/20 p-4 rounded-xl shadow-md">
         <Bar
           data={chartData}
           options={{

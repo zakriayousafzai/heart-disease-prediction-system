@@ -15,7 +15,7 @@ export default function Navbar(): JSX.Element {
     }`;
 
   return (
-    <nav className="bg-black/10 backdrop-blur-md border border-white/20 rounded-full m-5 shadow sticky top-5 z-50">
+    <nav className="bg-black/15 backdrop-blur-md border border-white/20 rounded-full m-5 shadow sticky top-5 z-50">
       <div className="max-w-7xl mx-auto px-7 h-16 flex justify-between items-center">
         <Link href="/" className="text-xl font-bold text-brand-fg">
           HeartPredict AI
