@@ -24,6 +24,6 @@
 body {
   background: #5b2333;
   font-family: "Manrope";
-background-color: #5b2333;
-background-image: url("https://www.transparenttextures.com/patterns/dark-mosaic.png");
-/* This is mostly intended for prototyping; please download the pattern and re-host for production environments. Thank you! */}
+  background-color: #5b2333;
+  background-image: url("../public/dark-mosaic.png");
+}
