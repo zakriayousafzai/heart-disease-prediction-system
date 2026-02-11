@@ -61,7 +61,7 @@ export default function Metrics(): JSX.Element {
 
   if (!metrics) {
     return (
-      <p className="text-center mt-10 text-gray-500">Loading metrics...</p>
+      <p className="text-center mt-10 text-brand-fg">Loading metrics...</p>
     );
   }
 
@@ -71,7 +71,7 @@ export default function Metrics(): JSX.Element {
       {
         label: "Accuracy (%)",
         data: [metrics.ann, metrics.rf, metrics.lr],
-        backgroundColor: ["#808080", "#808080", "#808080"],
+        backgroundColor: "#808080",
         borderRadius: 6,
       },
     ],
@@ -103,7 +103,7 @@ export default function Metrics(): JSX.Element {
       </div>
 
       {/* 📊 Bar Chart */}
-      <div className="bg-white p-4 rounded-xl shadow-md">
+      <div className="bg-black/10 backdrop-blur-md border border-white/20 p-4 rounded-xl shadow-md">
         <Bar data={chartData} options={{ responsive: true }} />
       </div>
     </div>
@@ -113,7 +113,7 @@ export default function Metrics(): JSX.Element {
 /* ---------- Metric Card ---------- */
 function MetricCard({ title, value, best }: MetricCardProps): JSX.Element {
   return (
-    <div className="bg-brand-fg p-5 rounded-xl text-center border-2 border-gray-200">
+    <div className="bg-black/10 backdrop-blur-md border border-white/20 p-5 rounded-xl text-center text-brand-fg">
       <h3 className="text-lg font-semibold">{title}</h3>
       <p className="text-2xl font-bold mt-2">{value.toFixed(2)}%</p>
     </div>
