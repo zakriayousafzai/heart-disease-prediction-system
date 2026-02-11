@@ -41,7 +41,7 @@ export default function HistoryPage(): JSX.Element {
         Prediction History (Last 50 Records)
       </h1>
 
-      <div className="overflow-x-auto bg-gray-500">
+      <div className="overflow-x-auto">
         <table className="w-full border border-gray-300 text-sm">
           <thead className="bg-gray-100">
             <tr>
