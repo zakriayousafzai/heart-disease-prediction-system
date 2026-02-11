@@ -41,7 +41,7 @@ export default function Metrics(): JSX.Element {
         const entries = Object.entries(data);
         const [bestKey] = entries.reduce(
           (prev, curr) => (curr[1] > prev[1] ? curr : prev),
-          ["", -Infinity]
+          ["", -Infinity],
         );
 
         const modelNames: Record<string, string> = {
@@ -60,7 +60,9 @@ export default function Metrics(): JSX.Element {
   }, []);
 
   if (!metrics) {
-    return <p className="text-center mt-10 text-gray-500">Loading metrics...</p>;
+    return (
+      <p className="text-center mt-10 text-gray-500">Loading metrics...</p>
+    );
   }
 
   const chartData = {
@@ -69,7 +71,7 @@ export default function Metrics(): JSX.Element {
       {
         label: "Accuracy (%)",
         data: [metrics.ann, metrics.rf, metrics.lr],
-        backgroundColor: ["#3b82f6", "#22c55e", "#f97316"],
+        backgroundColor: ["#808080", "#808080", "#808080"],
         borderRadius: 6,
       },
     ],
@@ -77,7 +79,7 @@ export default function Metrics(): JSX.Element {
 
   return (
     <div className="max-w-5xl mx-auto p-4">
-      <h2 className="text-3xl font-bold text-center mb-6">
+      <h2 className="text-3xl font-bold text-center mb-6 text-brand-fg">
         Model Performance Metrics
       </h2>
 
@@ -111,18 +113,9 @@ export default function Metrics(): JSX.Element {
 /* ---------- Metric Card ---------- */
 function MetricCard({ title, value, best }: MetricCardProps): JSX.Element {
   return (
-    <div
-      className={`p-5 rounded-xl shadow-md text-center border-2 transition-transform duration-200 hover:scale-105 ${
-        best ? "border-green-500 bg-green-50" : "border-gray-200"
-      }`}
-    >
+    <div className="bg-brand-fg p-5 rounded-xl text-center border-2 border-gray-200">
       <h3 className="text-lg font-semibold">{title}</h3>
-      <p className="text-2xl font-bold mt-2">{(value).toFixed(2)}%</p>
-      {best && (
-        <span className="inline-block mt-2 text-green-600 font-semibold">
-          🟢 Best Model
-        </span>
-      )}
+      <p className="text-2xl font-bold mt-2">{value.toFixed(2)}%</p>
     </div>
   );
 }
