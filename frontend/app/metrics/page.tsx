@@ -10,6 +10,7 @@ import {
   Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
+import { color } from "chart.js/helpers";
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
@@ -71,7 +72,7 @@ export default function Metrics(): JSX.Element {
       {
         label: "Accuracy (%)",
         data: [metrics.ann, metrics.rf, metrics.lr],
-        backgroundColor: "#808080",
+        backgroundColor: "#020617",
         borderRadius: 6,
       },
     ],
@@ -104,7 +105,37 @@ export default function Metrics(): JSX.Element {
 
       {/* 📊 Bar Chart */}
       <div className="bg-black/10 backdrop-blur-md border border-white/20 p-4 rounded-xl shadow-md">
-        <Bar data={chartData} options={{ responsive: true }} />
+        <Bar
+          data={chartData}
+          options={{
+            responsive: true,
+            plugins: {
+              legend: {
+                labels: {
+                  color: "var(--color-brand-fg)", // Colors the "Accuracy (%)" legend text
+                },
+              },
+            },
+            scales: {
+              y: {
+                ticks: {
+                  color: "var(--color-brand-fg)", // Colors the Y-axis numbers (0, 10, 20...)
+                },
+                grid: {
+                  color: "rgba(247, 244, 243, 0.1)", // Subtle grid lines
+                },
+              },
+              x: {
+                ticks: {
+                  color: "var(--color-brand-fg)", // Colors the X-axis labels (ANN, Random Forest, etc.)
+                },
+                grid: {
+                  display: false, // Cleaner look by removing vertical grid lines
+                },
+              },
+            },
+          }}
+        />
       </div>
     </div>
   );

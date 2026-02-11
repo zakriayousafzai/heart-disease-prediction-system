@@ -36,12 +36,12 @@ export default function HistoryPage(): JSX.Element {
   }
 
   return (
-    <div className="p-6">
+    <div className="w-full rounded-2xl shadow-xl p-6 md:p-10 bg-black/10 backdrop-blur-md border border-white/20">
       <h1 className="text-2xl font-bold mb-4 text-brand-fg">
         Prediction History (Last 50 Records)
       </h1>
 
-      <div className="overflow-x-auto bg-brand-fg">
+      <div className="overflow-x-auto bg-gray-500">
         <table className="w-full border border-gray-300 text-sm">
           <thead className="bg-gray-100">
             <tr>

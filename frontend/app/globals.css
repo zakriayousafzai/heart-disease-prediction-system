@@ -2,8 +2,13 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-bg: #5b2333;
-  --color-brand-fg: #f7f4f3;
+  --color-brand-bg: var(--color-brand-bg);
+  --color-brand-fg: var(--color-brand-fg);
+}
+
+:root {
+  --color-brand-bg: #22D3EE;
+  --color-brand-fg: #020617;
 }
 
 @layer base {
@@ -22,8 +27,8 @@
 }
 
 body {
-  background: #5b2333;
+  background: var(--color-brand-bg);
   font-family: "Manrope";
-  background-color: #5b2333;
+  background-color: var(--color-brand-bg);
   background-image: url("../public/dark-mosaic.png");
 }
