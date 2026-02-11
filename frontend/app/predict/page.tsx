@@ -114,13 +114,13 @@ export default function PredictPage() {
   const getPriorityBadgeColor = (priority: string) => {
     switch (priority) {
       case "high":
-        return "bg-red-100 text-red-800 border-red-300";
+        return "bg-red-100 text-red-800 ";
       case "medium":
-        return "bg-yellow-100 text-yellow-800 border-yellow-300";
+        return "bg-yellow-100 text-yellow-800";
       case "low":
-        return "bg-green-100 text-green-800 border-green-300";
+        return "bg-green-100 text-green-800";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-300";
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -359,7 +359,7 @@ export default function PredictPage() {
         {result && (
           <div className="mt-8 space-y-6">
             {/* Prediction Summary */}
-            <div className={`border rounded-xl p-5 bg-brand-fg`}>
+            <div className={`rounded-xl p-5 bg-brand-fg/10 border-brand-fg/30 text-brand-fg`}>
               <h2 className="text-xl font-bold mb-3">📊 Prediction Result</h2>
               <div className="space-y-2">
                 <p>
@@ -379,19 +379,19 @@ export default function PredictPage() {
 
             {/* Risk Factors Section */}
             {result.risk_factors && result.risk_factors.length > 0 && (
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
-                <h2 className="text-xl font-bold mb-4 text-blue-900">
+              <div className="bg-brand-fg/10 text-brand-fg rounded-xl p-5">
+                <h2 className="text-xl font-bold mb-4">
                   📋 Why This Prediction?
                 </h2>
-                <p className="text-sm text-blue-800 mb-4">
+                <p className="text-sm mb-4">
                   These are the top contributing factors based on your clinical
                   data:
                 </p>
-                <div className="space-y-4">
+                <div className="space-y-4 text-brand-fg">
                   {result.risk_factors.map((factor, idx) => (
                     <div
                       key={idx}
-                      className="bg-white rounded-lg p-4 border border-blue-100"
+                      className="bg-brand-fg/10 border-brand-fg/30 rounded-lg p-4 border"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
@@ -399,10 +399,10 @@ export default function PredictPage() {
                             {getImpactIcon(factor.impact, factor.direction)}
                           </span>
                           <div>
-                            <span className="font-semibold text-gray-800">
+                            <span className="font-semibold">
                               {factor.feature}
                             </span>
-                            <span className="text-gray-600 ml-2">
+                            <span className=" ml-2">
                               ({factor.value})
                             </span>
                           </div>
@@ -415,7 +415,7 @@ export default function PredictPage() {
                           {factor.impact} Impact
                         </span>
                       </div>
-                      <p className="text-sm text-gray-700 mb-2">
+                      <p className="text-sm mb-2">
                         {factor.description}
                       </p>
                       <div className="flex items-center gap-2">
@@ -434,7 +434,7 @@ export default function PredictPage() {
                             }}
                           ></div>
                         </div>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-brand-fg/60">
                           {factor.direction}
                         </span>
                       </div>
@@ -446,37 +446,37 @@ export default function PredictPage() {
 
             {/* Recommendations Section */}
             {result.recommendations && result.recommendations.length > 0 && (
-              <div className="bg-purple-50 border border-purple-200 rounded-xl p-5">
-                <h2 className="text-xl font-bold mb-4 text-purple-900">
+              <div className="bg-brand-fg/10 rounded-xl p-5 text-brand-fg">
+                <h2 className="text-xl font-bold mb-4">
                   💡 How to Lower Your Risk
                 </h2>
-                <p className="text-sm text-purple-800 mb-4">
+                <p className="text-sm mb-4">
                   Personalized recommendations based on your risk factors:
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {result.recommendations.map((rec, idx) => (
                     <div
                       key={idx}
-                      className="bg-white rounded-lg p-4 border border-purple-100 flex flex-col"
+                      className="bg-brand-fg/10 border-brand-fg/30 rounded-lg p-4 border flex flex-col"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <span className="text-3xl">{rec.icon}</span>
                         <span
-                          className={`text-xs px-2 py-1 rounded-full border font-medium ${getPriorityBadgeColor(
+                          className={`text-xs px-2 py-1 rounded-full font-medium ${getPriorityBadgeColor(
                             rec.priority,
                           )}`}
                         >
                           {rec.priority.toUpperCase()}
                         </span>
                       </div>
-                      <h3 className="font-semibold text-gray-800 mb-2">
+                      <h3 className="font-semibold mb-2">
                         {rec.title}
                       </h3>
-                      <p className="text-sm text-gray-600 flex-1">
+                      <p className="text-sm flex-1 text-brand-fg/80">
                         {rec.description}
                       </p>
-                      <div className="mt-3 pt-3 border-t border-gray-100">
-                        <span className="text-xs text-gray-500 capitalize">
+                      <div className="mt-3 pt-3 border-t">
+                        <span className="text-xs capitalize text-brand-fg/60">
                           {rec.category} Recommendation
                         </span>
                       </div>
@@ -487,7 +487,7 @@ export default function PredictPage() {
             )}
 
             {/* Medical Disclaimer */}
-            <div className="bg-gray-100 border border-gray-300 rounded-lg p-4 text-sm text-gray-700">
+            <div className="bg-brand-fg/10 border-brand-fg/30 rounded-lg p-4 text-sm text-brand-fg/80 border">
               <p className="font-semibold mb-1">⚠️ Medical Disclaimer</p>
               <p>
                 This prediction is generated by AI models and is for
