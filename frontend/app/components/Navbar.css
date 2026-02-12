@@ -1,0 +1,48 @@
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 1rem;
+}
+
+.nav-links li a {
+    color: white;
+    text-decoration: none;
+}
+
+.hamburger-icon {
+    display: none;
+    /* Hide by default on desktop */
+    cursor: pointer;
+}
+
+.bar {
+    width: 25px;
+    height: 3px;
+    background-color: white;
+    margin: 5px 0;
+    transition: 0.4s;
+}
+
+/* Media query for mobile screens */
+@media (max-width: 630px) {
+    .nav-links {
+        display: none;
+        /* Hide links on mobile initially */
+        flex-direction: column;
+        width: fit-content;
+        position: absolute;
+        top: 60px;
+        right: 0;
+        padding: 1rem;
+    }
+
+    .nav-links.open {
+        display: flex;
+        /* Show links when the 'open' class is applied */
+    }
+
+    .hamburger-icon {
+        display: block;
+        /* Show hamburger icon on mobile */
+    }
+}

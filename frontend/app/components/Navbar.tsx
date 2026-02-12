@@ -2,10 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { JSX } from "react";
+import { JSX, useState } from "react";
+import "./Navbar.css";
 
 export default function Navbar(): JSX.Element {
   const pathname = usePathname();
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
 
   const linkClass = (href: string): string =>
     `px-4 py-1 rounded-lg transition ${
@@ -21,7 +28,7 @@ export default function Navbar(): JSX.Element {
           HeartPredict AI
         </Link>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 max-[630px]:hidden">
           <Link href="/predict" className={linkClass("/predict")}>
             Predict
           </Link>
@@ -32,7 +39,34 @@ export default function Navbar(): JSX.Element {
             Metrics
           </Link>
         </div>
-        <div className="bg-brand-fg h-10 w-10 rounded-full flex items-center justify-center"/>
+        <div className="bg-brand-fg h-10 w-10 rounded-full flex items-center justify-center">
+          <div className="min-[630px]:hidden">
+
+          <div className="hamburger-icon" onClick={toggleMenu}>
+            <div className="bar"></div>
+            <div className="bar"></div>
+            <div className="bar"></div>
+          </div>
+
+          <ul className={`nav-links ${isOpen ? "open" : ""} rounded-2xl bg-black/50`}>
+            <li>
+              <Link href="/predict" className={linkClass("/predict")}>
+                Predict
+              </Link>
+            </li>
+            <li>
+              <Link href="/history" className={linkClass("/history")}>
+                History
+              </Link>
+            </li>
+            <li>
+              <Link href="/metrics" className={linkClass("/metrics")}>
+                Metrics
+              </Link>
+            </li>
+          </ul>
+          </div>
+        </div>
       </div>
     </nav>
   );
