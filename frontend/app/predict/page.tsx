@@ -143,10 +143,10 @@ export default function PredictPage() {
   return (
     <div className="min-h-screen flex justify-center items-start p-4 py-8">
       <div className="w-full max-w-6xl rounded-2xl shadow-xl p-6 md:p-10 bg-black/15 backdrop-blur-md border border-white/20">
-        <h1 className="text-5xl font-bold text-center text-brand-fg mb-2">
+        <h1 className="text-5xl max-[540px]:text-4xl font-bold text-center text-brand-fg mb-2">
           Heart Disease Prediction
         </h1>
-        <p className="text-center text-brand-fg/80 mb-8">
+        <p className="text-center text-brand-fg/80 mb-8 text-md max-[540px]:text-sm">
           Please fill the form carefully. All fields are required.
         </p>
 
