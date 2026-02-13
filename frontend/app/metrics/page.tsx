@@ -72,7 +72,11 @@ export default function Metrics(): JSX.Element {
       {
         label: "Accuracy (%)",
         data: [metrics.ann, metrics.rf, metrics.lr],
-        backgroundColor: "#020617",
+        backgroundColor: [
+          "#3b82f6",
+          "#22c55e",
+          "#f97316",
+        ],
         borderRadius: 6,
       },
     ],
@@ -144,9 +148,40 @@ export default function Metrics(): JSX.Element {
 /* ---------- Metric Card ---------- */
 function MetricCard({ title, value, best }: MetricCardProps): JSX.Element {
   return (
-    <div className="bg-black/10 backdrop-blur-md border border-white/20 p-5 rounded-xl text-center text-brand-fg">
-      <h3 className="text-lg font-semibold">{title}</h3>
-      <p className="text-2xl font-bold mt-2">{value.toFixed(2)}%</p>
-    </div>
-  );
+  <div
+    className={`relative group p-6 rounded-2xl text-center transition-all duration-300 
+    backdrop-blur-xl border overflow-hidden
+    ${
+      best
+        ? "border-green-400 shadow-[0_0_25px_rgba(34,197,94,0.4)] scale-105"
+        : "border-white/20 hover:scale-105 hover:shadow-xl"
+    }
+    bg-gradient-to-br from-black/15 to-black/30`}
+  >
+    {/* Glow Effect */}
+    {best && (
+      <div className="absolute inset-0 bg-green-500/10 blur-2xl opacity-40"></div>
+    )}
+
+    {/* Title */}
+    <h3 className="text-lg font-semibold tracking-wide text-black/90">
+      {title}
+    </h3>
+
+    {/* Accuracy Value */}
+    <p className="text-4xl font-extrabold mt-3 bg-gradient-to-r from-green-600 to-emerald-800 bg-clip-text text-transparent">
+      {value.toFixed(2)}%
+    </p>
+
+    {/* Best Badge */}
+    {best && (
+      <div className="absolute top-1 right-1 bg-green-500 text-white text-xs px-3 py-1 rounded-full shadow-lg animate-pulse">
+        🏆 Best Model
+      </div>
+    )}
+
+    {/* Subtle Bottom Line */}
+    <div className="mt-4 h-[2px] w-24 mx-auto bg-gradient-to-r from-green-500 to-transparent opacity-40 group-hover:opacity-100 transition"></div>
+  </div>
+);
 }
