@@ -73,8 +73,8 @@ export default function Metrics(): JSX.Element {
         label: "Accuracy (%)",
         data: [metrics.ann, metrics.rf, metrics.lr],
         backgroundColor: [
-          "#3b82f6",
           "#22c55e",
+          "#3b82f6",
           "#f97316",
         ],
         borderRadius: 6,
@@ -149,12 +149,12 @@ export default function Metrics(): JSX.Element {
 function MetricCard({ title, value, best }: MetricCardProps): JSX.Element {
   return (
   <div
-    className={`relative group p-6 rounded-2xl text-center transition-all duration-300 
+    className={`relative group p-6 rounded-2xl text-center 
     backdrop-blur-xl border overflow-hidden
     ${
       best
-        ? "border-green-400 shadow-[0_0_25px_rgba(34,197,94,0.4)] scale-105"
-        : "border-white/20 hover:scale-105 hover:shadow-xl"
+        ? "border-green-400 shadow-[0_0_25px_rgba(34,197,94,0.4)]"
+        : "border-white/20"
     }
     bg-gradient-to-br from-black/15 to-black/30`}
   >
