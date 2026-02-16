@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { JSX, useState } from "react";
 import "./Navbar.css";
+import Image from "next/image";
 
 export default function Navbar(): JSX.Element {
   const pathname = usePathname();
@@ -40,6 +41,7 @@ export default function Navbar(): JSX.Element {
           </Link>
         </div>
         <div className="bg-brand-fg h-10 w-10 rounded-full flex items-center justify-center">
+          <Image className="max-[630px]:hidden" src={"./heart.svg"} height={30} width={30} alt="heart"/>
           <div className="min-[630px]:hidden">
 
           <div className="hamburger-icon" onClick={toggleMenu}>
