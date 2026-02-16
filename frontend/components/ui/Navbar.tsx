@@ -40,8 +40,8 @@ export default function Navbar(): JSX.Element {
             Metrics
           </Link>
         </div>
-        <div className="bg-brand-fg h-10 w-10 rounded-full flex items-center justify-center">
-          <Image className="max-[630px]:hidden" src={"./heart.svg"} height={30} width={30} alt="heart"/>
+        <div className="group bg-brand-fg h-10 w-10 rounded-full flex items-center justify-center">
+          <Image className="max-[630px]:hidden group-hover-heartbeat" src={"./heart.svg"} height={30} width={30} alt="heart"/>
           <div className="min-[630px]:hidden">
 
           <div className="hamburger-icon" onClick={toggleMenu}>

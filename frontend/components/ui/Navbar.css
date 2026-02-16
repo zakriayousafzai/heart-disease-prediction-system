@@ -46,3 +46,8 @@
         /* Show hamburger icon on mobile */
     }
 }
+
+/* Change the class selector to trigger on hover of the parent or the element itself */
+.group:hover .group-hover-heartbeat {
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
