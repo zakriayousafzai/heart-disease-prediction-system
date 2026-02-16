@@ -108,7 +108,7 @@ export default function Metrics(): JSX.Element {
       </div>
 
       {/* 📊 Bar Chart */}
-      <div className="bg-black/15 backdrop-blur-md border border-white/20 p-4 rounded-xl shadow-md">
+      <div className="bg-black/10 backdrop-blur-md border border-white/20 p-4 rounded-xl shadow-md">
         <Bar
           data={chartData}
           options={{
@@ -156,7 +156,7 @@ function MetricCard({ title, value, best }: MetricCardProps): JSX.Element {
         ? "border-green-400 shadow-[0_0_25px_rgba(34,197,94,0.4)]"
         : "border-white/20"
     }
-    bg-gradient-to-br from-black/15 to-black/30`}
+    bg-black/10`}
   >
     {/* Glow Effect */}
     {best && (

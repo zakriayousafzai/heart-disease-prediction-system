@@ -36,7 +36,7 @@ export default function HistoryPage(): JSX.Element {
   }
 
   return (
-    <div className="w-full rounded-2xl shadow-xl p-6 md:p-10 bg-black/15 backdrop-blur-md border border-white/20">
+    <div className="w-full rounded-2xl shadow-xl p-6 md:p-10 bg-black/5 backdrop-blur-md border border-white/20">
       <h1 className="text-2xl font-bold mb-4 text-brand-fg">
         Prediction History (Last 50 Records)
       </h1>
