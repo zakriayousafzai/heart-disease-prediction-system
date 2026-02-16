@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import axios from "axios";
+import { Spinner } from "@/components/ui/spinner";
 
 interface RiskFactor {
   feature: string;
@@ -153,7 +154,7 @@ export default function PredictPage() {
         <div>
           <button
             type="button"
-            onClick={()=> handleExample()}
+            onClick={() => handleExample()}
             className="mb-4 bg-brand-fg hover:bg-brand-fg/90 text-brand-bg py-2 px-4 rounded-lg text-sm transition"
           >
             Load Example Data
@@ -348,10 +349,17 @@ export default function PredictPage() {
           {/* Submit */}
           <button
             type="submit"
-            className="md:col-span-2 mt-4 bg-brand-fg hover:bg-brand-fg/90 text-brand-bg py-3 rounded-xl text-lg font-semibold transition"
+            className="flex justify-center items-center md:col-span-2 mt-4 bg-brand-fg hover:bg-brand-fg/90 text-brand-bg py-3 rounded-xl text-lg font-semibold transition"
             disabled={loading}
           >
-            {loading ? "🔍 Analyzing..." : "❤️ Predict Heart Risk"}
+            {loading ? (
+              <div className="flex items-center">
+                Analyzing&nbsp;
+                <Spinner className="size-6" />
+              </div>
+            ) : (
+              "❤️ Predict Heart Risk"
+            )}
           </button>
         </form>
 
@@ -359,7 +367,9 @@ export default function PredictPage() {
         {result && (
           <div className="mt-8 space-y-6">
             {/* Prediction Summary */}
-            <div className={`rounded-xl p-5 bg-brand-fg/10 border-brand-fg/30 text-brand-fg`}>
+            <div
+              className={`rounded-xl p-5 bg-brand-fg/10 border-brand-fg/30 text-brand-fg`}
+            >
               <h2 className="text-xl font-bold mb-3">📊 Prediction Result</h2>
               <div className="space-y-2">
                 <p>
@@ -402,9 +412,7 @@ export default function PredictPage() {
                             <span className="font-semibold">
                               {factor.feature}
                             </span>
-                            <span className=" ml-2">
-                              ({factor.value})
-                            </span>
+                            <span className=" ml-2">({factor.value})</span>
                           </div>
                         </div>
                         <span
@@ -415,9 +423,7 @@ export default function PredictPage() {
                           {factor.impact} Impact
                         </span>
                       </div>
-                      <p className="text-sm mb-2">
-                        {factor.description}
-                      </p>
+                      <p className="text-sm mb-2">{factor.description}</p>
                       <div className="flex items-center gap-2">
                         <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
                           <div
@@ -469,9 +475,7 @@ export default function PredictPage() {
                           {rec.priority.toUpperCase()}
                         </span>
                       </div>
-                      <h3 className="font-semibold mb-2">
-                        {rec.title}
-                      </h3>
+                      <h3 className="font-semibold mb-2">{rec.title}</h3>
                       <p className="text-sm flex-1 text-brand-fg/80">
                         {rec.description}
                       </p>

@@ -1,6 +1,6 @@
 import { JSX } from "react";
 import "./globals.css";
-import Navbar from "@/app/components/Navbar";
+import Navbar from "@/components/ui/Navbar";
 
 export const metadata = {
   title: "Heart Disease Prediction System",
