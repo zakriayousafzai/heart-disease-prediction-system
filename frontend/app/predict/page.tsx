@@ -3,6 +3,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { Spinner } from "@/components/ui/spinner";
+import Image from "next/image";
 
 interface RiskFactor {
   feature: string;
@@ -355,7 +356,7 @@ export default function PredictPage() {
             {loading ? (
               <div className="flex items-center">
                 Analyzing&nbsp;
-                <Spinner className="size-6" />
+                <Image className="max-[630px]:hidden animate-heartbeat" src={"./heart.svg"} height={30} width={30} alt="heart"/>
               </div>
             ) : (
               "❤️ Predict Heart Risk"
