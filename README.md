@@ -73,6 +73,11 @@ Heart disease is one of the leading causes of death worldwide. Early and accurat
 - ✅ **Regularization**: Dropout and batch normalization to prevent overfitting
 - ✅ **Class Balancing**: Weighted loss function for imbalanced dataset handling
 
+### Advanced Features
+- ✅ **SHAP Explainability**: Model-agnostic feature importance using SHAP values to explain predictions
+- ✅ **AI Recommendations**: Google Gemini AI integration for personalized health recommendations
+- ✅ **Environment Configuration**: Secure management of API keys and database credentials via .env
+
 ---
 
 ## Project Architecture
@@ -128,6 +133,9 @@ Heart disease is one of the leading causes of death worldwide. Early and accurat
 | Machine Learning | scikit-learn | 1.8.0 |
 | Data Processing | pandas, NumPy | 3.0.0, 2.4.1 |
 | CORS | flask-cors | 6.0.2 |
+| Model Explainability | SHAP | 0.45.0 |
+| AI Integration | Google Generative AI | - |
+| Environment Variables | python-dotenv | 1.0.0 |
 
 ### Frontend
 | Component | Technology | Version |
@@ -181,12 +189,21 @@ Ensure you have the following installed:
    pip install -r requirements.txt
    ```
 
-4. **Configure PostgreSQL database:**
+4. **Configure environment variables:**
    
-   Create a database named `heart_db` and update the connection string in [`backend/app.py`](backend/app.py:31) if needed:
-   ```python
-   app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:your_password@localhost:5432/heart_db'
+   Create a `.env` file in the `backend/` directory with the following configuration:
+   ```env
+   # Database Configuration
+   DB_URI=postgresql://postgres:your_password@localhost:5432/heart_db
+   
+   # Google Gemini AI Configuration (for AI recommendations)
+   API_KEY=your_gemini_api_key_here
    ```
+   
+   - **DB_URI**: PostgreSQL connection string in format `postgresql://username:password@host:port/database`
+   - **API_KEY**: Your Google Gemini API key. Get it from [Google AI Studio](https://aistudio.google.com/app/apikey)
+   
+   > **Note**: The `.env` file is already included in `.gitignore` to protect sensitive credentials.
 
 5. **Verify model files exist in [`backend/Models/`](backend/Models/):**
    - `scaler.pkl` - Feature normalization scaler
@@ -383,6 +400,121 @@ A linear probabilistic classifier for **binary classification**:
 
 - **Solver Optimization**: Tests multiple solvers (lbfgs, liblinear, newton-cg, newton-cholesky, sag, saga)
 - **Automatic Selection**: Chooses best-performing solver for the dataset
+
+---
+
+## Advanced Features
+
+### 1. SHAP Explainability
+
+The system implements **SHAP (SHapley Additive exPlanations)** to provide interpretable predictions by identifying which features contribute most to each patient's risk assessment.
+
+**How It Works:**
+
+- Uses `shap.TreeExplainer` on the Random Forest model
+- Computes SHAP values for each prediction
+- Extracts top 5 most influential features sorted by absolute SHAP value
+
+**Features Returned per Prediction:**
+
+| Field | Description |
+|-------|-------------|
+| `feature` | Clinical feature name |
+| `value` | Patient's value (human-readable format) |
+| `impact` | Impact level (high/medium/low) based on SHAP magnitude |
+| `impact_score` | Numeric SHAP value |
+| `direction` | "increases risk" or "decreases risk" |
+| `description` | Clinical significance of the feature value |
+
+**Example Response:**
+```json
+{
+  "risk_factors": [
+    {
+      "feature": "ST Slope",
+      "value": "Downsloping",
+      "impact": "high",
+      "impact_score": 0.8234,
+      "direction": "increases risk",
+      "description": "ST slope is Downsloping (concerning pattern)"
+    },
+    ...
+  ]
+}
+```
+
+**Benefits:**
+- Builds trust in model predictions
+- Helps healthcare professionals understand "why" a prediction was made
+- Identifies specific clinical factors driving risk
+
+---
+
+### 2. Google Gemini AI Recommendations
+
+The system integrates **Google Gemini AI** to generate personalized health recommendations based on:
+- Patient's clinical data
+- Model predictions from all three models
+- SHAP-identified risk factors
+
+**How It Works:**
+
+1. Constructs a detailed prompt with patient data, predictions, and risk factors
+2. Sends to Gemini 2.5 Flash model via Google Generative AI API
+3. Parses JSON response with validated recommendations
+
+**Recommendation Structure:**
+
+```json
+{
+  "recommendations": [
+    {
+      "category": "dietary" | "medical" | "lifestyle",
+      "icon": "emoji",
+      "title": "short title",
+      "description": "detailed advice (2-3 sentences)",
+      "priority": "high" | "medium" | "low"
+    }
+  ]
+}
+```
+
+**Configuration:**
+- Model: `gemini-2.5-flash`
+- Requires: `API_KEY` in `.env` file
+- Fallback: Returns empty recommendations if API key is not configured
+
+**Example Recommendations:**
+- Dietary: "Reduce sodium intake to help lower blood pressure"
+- Medical: "Consider ECG follow-up given exercise-induced ST changes"
+- Lifestyle: "Aim for 150 minutes of moderate aerobic activity per week"
+
+---
+
+### 3. Environment Configuration
+
+The backend uses **environment variables** for secure configuration of sensitive data.
+
+**Configuration File:** `backend/.env`
+
+```env
+# Database Configuration
+DB_URI=postgresql://postgres:password@localhost:5432/heart_db
+
+# Google Gemini AI API Key
+API_KEY=your_gemini_api_key_here
+```
+
+**Variables:**
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DB_URI` | Yes | PostgreSQL connection string. Format: `postgresql://user:password@host:port/database` |
+| `API_KEY` | No | Google Gemini API key. Required for AI recommendations. Get free key at [Google AI Studio](https://aistudio.google.com/app/apikey) |
+
+**Security:**
+- The `.env` file is tracked in `.gitignore` to prevent committing secrets
+- If `API_KEY` is missing, the system gracefully falls back to basic predictions without AI recommendations
 
 ---
 
