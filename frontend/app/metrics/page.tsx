@@ -17,8 +17,8 @@ ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 /* ---------- Types ---------- */
 interface MetricsData {
   ann: number;
-  rf: number;
   lr: number;
+  rf: number;
 }
 
 interface MetricCardProps {
@@ -47,8 +47,8 @@ export default function Metrics(): JSX.Element {
 
         const modelNames: Record<string, string> = {
           ann: "ANN",
-          rf: "Random Forest",
           lr: "Logistic Regression",
+          rf: "Random Forest",
         };
 
         setBestModel(modelNames[bestKey] || "");
@@ -67,11 +67,11 @@ export default function Metrics(): JSX.Element {
   }
 
   const chartData = {
-    labels: ["ANN", "Random Forest", "Logistic Regression"],
+    labels: ["ANN", "Logistic Regression", "Random Forest"],
     datasets: [
       {
         label: "Accuracy (%)",
-        data: [metrics.ann, metrics.rf, metrics.lr],
+        data: [metrics.ann, metrics.lr, metrics.rf],
         backgroundColor: [
           "#22c55e",
           "#3b82f6",
@@ -93,8 +93,8 @@ export default function Metrics(): JSX.Element {
         {Object.entries(metrics).map(([key, value]) => {
           const modelNames: Record<string, string> = {
             ann: "ANN",
-            rf: "Random Forest",
             lr: "Logistic Regression",
+            rf: "Random Forest",
           };
           return (
             <MetricCard
