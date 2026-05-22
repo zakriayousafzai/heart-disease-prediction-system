@@ -204,8 +204,17 @@ try:
     log_reg_model = pickle.load(open('./Models/log_reg_model.pkl', 'rb'))
     rfc_model = pickle.load(open('./Models/rfc_model.pkl', 'rb'))
     
-    # Initialize SHAP explainer for Random Forest model
-    rf_explainer = shap.TreeExplainer(rfc_model)
+    # Initialize SHAP KernelExplainer for ANN model
+    ann_shap_background = pickle.load(open('./Models/ann_shap_samples.pkl', 'rb'))
+
+    def ann_predict_proba_fn(data):
+        data_t = torch.FloatTensor(data)
+        with torch.no_grad():
+            logits = ann_model(data_t)
+            probs = F.softmax(logits, dim=1).cpu().numpy()
+        return probs
+
+    ann_explainer = shap.KernelExplainer(ann_predict_proba_fn, ann_shap_background)
     
     # Load pre-computed model accuracy metrics for comparison
     metrics_data = {
@@ -214,11 +223,11 @@ try:
         "lr": pickle.load(open('./Models/lr_accuracy.pkl', 'rb'))
     }
     print("All models loaded successfully.")
-    print("SHAP explainer initialized for Random Forest model.")
+    print("SHAP KernelExplainer initialized for ANN model.")
 except Exception as e:
     print(f"Error loading models: {e}")
     metrics_data = {"ann": 0, "rf": 0, "lr": 0}
-    rf_explainer = None
+    ann_explainer = None
 
 # ========================= EXPLAINABILITY HELPER FUNCTIONS =========================
 
@@ -480,24 +489,30 @@ def predict():
         risk_factors = []
         recommendations = []
         
-        # Compute SHAP values if explainer is available
-        if rf_explainer is not None:
+        # Compute SHAP values if ANN explainer is available
+        if ann_explainer is not None:
             try:
-                # Compute SHAP values for this prediction
-                shap_values = rf_explainer.shap_values(raw_features_df)
-                
-                # Extract the SHAP values for class 1 (disease) and flatten to 1D
-                if isinstance(shap_values, list) and len(shap_values) == 2:
-                    # Binary classification returns list [class_0_shap, class_1_shap]
-                    raw_shap = np.array(shap_values[1]).flatten()
-                elif isinstance(shap_values, np.ndarray) and shap_values.ndim == 3:
-                    # Shape: (n_samples, n_features, n_classes)
-                    raw_shap = shap_values[0, :, 1].flatten()
-                elif isinstance(shap_values, np.ndarray) and shap_values.ndim == 2:
-                    # Shape: (n_samples, n_features)
-                    raw_shap = shap_values[0].flatten()
+                # Compute ANN SHAP values on scaled features
+                shap_values = ann_explainer.shap_values(features_scaled, nsamples=100)
+
+                # Use SHAP values for the predicted ANN class
+                if isinstance(shap_values, list):
+                    # Common multi-class format: list[n_classes] of (n_samples, n_features)
+                    raw_shap = np.array(shap_values[pred_idx][0]).flatten()
                 else:
-                    raw_shap = np.array(shap_values).flatten()
+                    shap_arr = np.array(shap_values)
+                    if shap_arr.ndim == 3:
+                        # Could be (n_samples, n_features, n_classes)
+                        if shap_arr.shape[0] == features_scaled.shape[0]:
+                            raw_shap = shap_arr[0, :, pred_idx].flatten()
+                        else:
+                            # Could be (n_classes, n_samples, n_features)
+                            raw_shap = shap_arr[pred_idx, 0, :].flatten()
+                    elif shap_arr.ndim == 2:
+                        # Single-output format fallback
+                        raw_shap = shap_arr[0].flatten()
+                    else:
+                        raw_shap = shap_arr.flatten()
                 
                 # Ensure we have a 1D array of length 11 (one per feature)
                 shap_direction = raw_shap[:11]
