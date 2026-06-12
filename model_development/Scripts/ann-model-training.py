@@ -20,6 +20,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import shap
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.utils.class_weight import compute_class_weight
@@ -63,6 +64,7 @@ heart_df['RiskCategory'] = heart_df.apply(assign_risk, axis=1)
 # -------------------- Feature and Target Extraction --------------------
 # Separate features (X) and target labels (y)
 # Remove both original binary label and new multi-class label from features
+feature_names = heart_df.drop(['HeartDisease', 'RiskCategory'], axis=1).columns.tolist()
 X = heart_df.drop(['HeartDisease', 'RiskCategory'], axis=1).values
 y = heart_df['RiskCategory'].values
 
@@ -76,7 +78,7 @@ scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)  # Fit on training data only
 X_test = scaler.transform(X_test)        # Transform test data using training statistics
 # Save scaler for use in production (app.py)
-pickle.dump(scaler, open('../../saved_models/scaler.pkl', 'wb'))
+pickle.dump(scaler, open('../Models/scaler.pkl', 'wb'))
 
 # ========================= HANDLING CLASS IMBALANCE =========================
 
@@ -198,7 +200,69 @@ model.load_state_dict(best_model_wts)
 print(f"Best ANN Accuracy Achieved: {best_acc:.2f}%")
 
 # Save model architecture weights for deployment
-torch.save(model.state_dict(), '../../saved_models/ann_model.pth')
+torch.save(model.state_dict(), '../Models/ann_model.pth')
 
 # Save accuracy metric for display in web application
-pickle.dump(best_acc, open('../../saved_models/ann_accuracy.pkl', 'wb'))
+pickle.dump(best_acc, open('../Models/ann_accuracy.pkl', 'wb'))
+
+# ========================= SHAP EXPLAINABILITY (KERNEL EXPLAINER) =========================
+
+# KernelExplainer works with any black-box model, including PyTorch ANNs.
+# It explains predictions by approximating Shapley values around a background dataset.
+model.eval()
+
+def predict_proba_fn(data):
+    """
+    Wrapper for SHAP that returns class probabilities from the trained ANN.
+
+    Args:
+        data: NumPy array of shape (n_samples, n_features)
+
+    Returns:
+        np.ndarray: Predicted probabilities of shape (n_samples, 3)
+    """
+    data_t = torch.FloatTensor(data)
+    with torch.no_grad():
+        logits = model(data_t)
+        probs = torch.softmax(logits, dim=1).cpu().numpy()
+    return probs
+
+# Use a representative subset as SHAP background to keep KernelExplainer tractable.
+rng = np.random.default_rng(42)
+background_size = min(100, X_train.shape[0])
+background_idx = rng.choice(X_train.shape[0], size=background_size, replace=False)
+background_data = X_train[background_idx]
+
+# Explain a subset of test samples (can be increased if needed, but this is faster).
+explain_size = min(50, X_test.shape[0])
+explain_idx = rng.choice(X_test.shape[0], size=explain_size, replace=False)
+X_explain = X_test[explain_idx]
+
+explainer = shap.KernelExplainer(predict_proba_fn, background_data)
+shap_values = explainer.shap_values(X_explain)
+
+# Persist SHAP artifacts for later inspection/visualization in notebooks or app layers.
+pickle.dump(shap_values, open('../Models/ann_shap_values.pkl', 'wb'))
+pickle.dump(X_explain, open('../Models/ann_shap_samples.pkl', 'wb'))
+pickle.dump(feature_names, open('../Models/ann_shap_feature_names.pkl', 'wb'))
+
+# Build a simple global feature-importance file from mean absolute SHAP values.
+if isinstance(shap_values, list):
+    # Multi-class format in many SHAP versions: list[n_classes] of (n_samples, n_features)
+    abs_vals = np.mean([np.abs(class_vals) for class_vals in shap_values], axis=0)
+else:
+    # Newer SHAP versions may return a single array with output dimension included.
+    vals = np.array(shap_values)
+    if vals.ndim == 3:
+        abs_vals = np.mean(np.abs(vals), axis=2)
+    else:
+        abs_vals = np.abs(vals)
+
+global_importance = np.mean(abs_vals, axis=0)
+importance_df = pd.DataFrame({
+    'feature': feature_names,
+    'mean_abs_shap': global_importance
+}).sort_values('mean_abs_shap', ascending=False)
+importance_df.to_csv('../Models/ann_shap_importance.csv', index=False)
+
+print("SHAP artifacts saved: ann_shap_values.pkl, ann_shap_samples.pkl, ann_shap_feature_names.pkl, ann_shap_importance.csv")
