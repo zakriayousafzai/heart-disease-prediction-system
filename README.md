@@ -148,7 +148,7 @@ Heart disease is one of the leading causes of death worldwide. Early and accurat
 ### Model Development
 | Component | Technology | Purpose |
 |-----------|------------|---------|
-| Visualization | Plotly, Matplotlib, Seaborn | Data exploration |
+| Visualization | Plotly | Data exploration |
 | Dashboard | Streamlit | Interactive UI |
 | Imputation | scikit-learn KNNImputer | Missing value handling |
 
@@ -283,7 +283,7 @@ Ensure you have the following installed:
 
 1. **Start the Streamlit application:**
    ```bash
-   cd backend
+   cd model_development
    streamlit run dashboard.py
    ```
 
@@ -734,6 +734,15 @@ FYP/
 │   ├── Datasets/
 │   │   ├── heart.csv                  # Original dataset (918 records)
 │   │   └── heart_cleaned.csv          # Preprocessed dataset
+│   ├── Models/                         # Trained model artifacts
+│   │   ├── ann_model.pth
+│   │   ├── ann_accuracy.pkl
+│   │   ├── ann_shap_samples.pkl
+│   │   ├── log_reg_model.pkl
+│   │   ├── lr_accuracy.pkl
+│   │   ├── rfc_model.pkl
+│   │   ├── rf_accuracy.pkl
+│   │   └── scaler.pkl
 │   ├── Scripts/
 │   │   ├── preprocessing.py           # Data cleaning & preparation
 │   │   ├── ann-model-training.py      # ANN model training
@@ -744,15 +753,6 @@ FYP/
 │       ├── heartDisease-distribution.png
 │       ├── histogram-age-heartDisease.png
 │       └── ... (additional visualizations)
-│
-└── saved_models/                      # Backup of trained models
-    ├── ann_model.pth
-    ├── ann_accuracy.pkl
-    ├── log_reg_model.pkl
-    ├── lr_accuracy.pkl
-    ├── rfc_model.pkl
-    ├── rf_accuracy.pkl
-    └── scaler.pkl
 ```
 
 ---
