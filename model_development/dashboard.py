@@ -104,7 +104,7 @@ with tab1:
     # -------------------- Model Configuration --------------------
     # Define traditional ML models for binary classification
     algo_names = ["Logistic Regression", "Random Forest"]
-    model_names = ["../saved_models/log_reg_model.pkl", "../saved_models/rfc_model.pkl"]
+    model_names = ["Models/log_reg_model.pkl", "Models/rfc_model.pkl"]
     
     # Storage for predictions from multiple models
     predictions = []
@@ -144,12 +144,12 @@ with tab1:
         st.header('Artificial Neural Network Prediction')
         
         # Step 1: Load and apply feature scaling (same scaler used during training)
-        scaler = pickle.load(open('../saved_models/scaler.pkl', 'rb'))
+        scaler = pickle.load(open('Models/scaler.pkl', 'rb'))
         input_scaled = scaler.transform(input_data.values)
     
         # Step 2: Load trained PyTorch model and set to evaluation mode
         model = HeartANN(input_data.shape[1])
-        model.load_state_dict(torch.load('../saved_models/ann_model.pth'))
+        model.load_state_dict(torch.load('Models/ann_model.pth'))
         model.eval()
     
         # Step 3: Generate predictions with gradient computation disabled
@@ -178,17 +178,17 @@ with tab2:
     # Use default value of 0.0 if accuracy file is missing
     
     try:
-        lr_acc = pickle.load(open('../saved_models/lr_accuracy.pkl', 'rb'))
+        lr_acc = pickle.load(open('Models/lr_accuracy.pkl', 'rb'))
     except FileNotFoundError:
         lr_acc = 0.0
         
     try:
-        rf_acc = pickle.load(open('../saved_models/rf_accuracy.pkl', 'rb'))
+        rf_acc = pickle.load(open('Models/rf_accuracy.pkl', 'rb'))
     except FileNotFoundError:
         rf_acc = 0.0
         
     try:
-        ann_acc = pickle.load(open('../saved_models/ann_accuracy.pkl', 'rb'))
+        ann_acc = pickle.load(open('Models/ann_accuracy.pkl', 'rb'))
     except FileNotFoundError:
         ann_acc = 0.0
 

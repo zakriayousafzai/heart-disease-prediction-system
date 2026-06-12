@@ -74,8 +74,8 @@ lr_acc = accuracy_score(y_test, log_reg_pred) * 100
 
 # -------------------- Model Persistence --------------------
 # Save trained model and accuracy for deployment
-pickle.dump(lr_acc, open('../../saved_models/lr_accuracy.pkl', 'wb'))
-pickle.dump(log_reg, open('../../saved_models/log_reg_model.pkl', 'wb'))
+pickle.dump(lr_acc, open('../Models/lr_accuracy.pkl', 'wb'))
+pickle.dump(log_reg, open('../Models/log_reg_model.pkl', 'wb'))
 
 # Display training results
 print(f"Best Logistic Regression Solver: {best_solver}")
@@ -118,8 +118,8 @@ rf_acc = accuracy_score(y_test, rfc_pred) * 100
 
 # -------------------- Model Persistence --------------------
 # Save trained model and accuracy for deployment
-pickle.dump(rf_acc, open('../../saved_models/rf_accuracy.pkl', 'wb'))
-pickle.dump(rfctree, open('../../saved_models/rfc_model.pkl', 'wb'))
+pickle.dump(rf_acc, open('../Models/rf_accuracy.pkl', 'wb'))
+pickle.dump(rfctree, open('../Models/rfc_model.pkl', 'wb'))
 
 # Display training results
 print(f'Random Forest Accuracy: {accuracy_score(y_test, rfc_pred):.4f}')
