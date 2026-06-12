@@ -34,19 +34,20 @@ http://localhost:5000
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `GEMINI_API_KEY` | Yes (for AI recommendations) | Google Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey). If not set, recommendations will not be generated. |
+| `DB_URI` | Yes | PostgreSQL connection string for SQLAlchemy. Format: `postgresql://username:password@host:port/database` |
+| `API_KEY` | No (optional) | Google Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey). If not set, recommendations will not be generated. |
 
 **Setting the API key:**
 
 ```bash
 # Windows (cmd)
-set GEMINI_API_KEY=your_api_key_here
+set API_KEY=your_api_key_here
 
 # Windows (PowerShell)
-$env:GEMINI_API_KEY="your_api_key_here"
+$env:API_KEY="your_api_key_here"
 
 # Linux/macOS
-export GEMINI_API_KEY=your_api_key_here
+export API_KEY=your_api_key_here
 ```
 
 ---
@@ -200,9 +201,9 @@ POST /predict
 | `lr_prediction` | string | Logistic Regression prediction: `"Heart Disease Detected"` or `"No Heart Disease Detected"` |
 | `id` | integer | Database ID of the saved patient record |
 | `risk_factors` | array | **(Optional)** Top 5 contributing risk factors based on SHAP analysis. Each factor includes:<br>- `feature`: Feature name (e.g., "Cholesterol")<br>- `value`: Formatted value (e.g., "250 mg/dl")<br>- `impact`: Impact level (`"high"`, `"medium"`, or `"low"`)<br>- `impact_score`: Numerical SHAP importance score (0-1+)<br>- `direction`: `"increases risk"` or `"decreases risk"`<br>- `description`: Human-readable explanation |
-| `recommendations` | array | **(Optional)** AI-generated personalized health recommendations powered by **Google Gemini 2.0 Flash**. The AI receives patient data, prediction results, and SHAP risk factors as context for generating highly personalized advice. Each recommendation includes:<br>- `category`: Type (`"dietary"`, `"medical"`, or `"lifestyle"`)<br>- `icon`: Emoji icon for visual representation<br>- `title`: Recommendation title<br>- `description`: Detailed actionable advice (AI-generated, personalized to patient)<br>- `priority`: Priority level (`"high"`, `"medium"`, or `"low"`) |
+| `recommendations` | array | **(Optional)** AI-generated personalized health recommendations powered by **Google Gemini 2.5 Flash**. The AI receives patient data, prediction results, and SHAP risk factors as context for generating highly personalized advice. Each recommendation includes:<br>- `category`: Type (`"dietary"`, `"medical"`, or `"lifestyle"`)<br>- `icon`: Emoji icon for visual representation<br>- `title`: Recommendation title<br>- `description`: Detailed actionable advice (AI-generated, personalized to patient)<br>- `priority`: Priority level (`"high"`, `"medium"`, or `"low"`) |
 
-**Note:** The `risk_factors` field requires SHAP explainer initialization. The `recommendations` field requires Google Gemini AI (`GEMINI_API_KEY` must be set). If SHAP or Gemini are unavailable, the prediction is still returned without these optional fields.
+**Note:** The `risk_factors` field requires SHAP explainer initialization. The `recommendations` field requires Google Gemini AI (`API_KEY` must be set). If SHAP or Gemini are unavailable, the prediction is still returned without these optional fields.
 
 #### Error Response
 
@@ -326,7 +327,7 @@ The database stores patient records with the following schema:
 
 ## Neural Network Architecture
 
-The ANN model ([`HeartANN`](app.py:90)) uses the following architecture:
+The ANN model ([`HeartANN`](app.py:157)) uses the following architecture:
 
 ```
 Input Layer (11 features)
@@ -360,10 +361,16 @@ Output Layer (3 classes)
 
 ### Database Configuration
 
-The API connects to PostgreSQL using the following configuration in [`app.py`](app.py:31):
+The API connects to PostgreSQL using the `DB_URI` environment variable in [`app.py`](app.py:38):
 
 ```python
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:7861@localhost:5432/heart_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DB_URI')
+```
+
+Example `.env` value:
+
+```env
+DB_URI=postgresql://postgres:your_password@localhost:5432/heart_db
 ```
 
 ### Required Model Files
@@ -379,6 +386,7 @@ The following files must be present in the [`Models/`](Models/) directory:
 | `ann_accuracy.pkl` | ANN accuracy metric |
 | `rf_accuracy.pkl` | Random Forest accuracy metric |
 | `lr_accuracy.pkl` | Logistic Regression accuracy metric |
+| `ann_shap_samples.pkl` | SHAP background samples used by `KernelExplainer` |
 
 ### Installation
 
@@ -417,7 +425,7 @@ The API will be available at `http://localhost:5000`
 
 ## CORS Configuration
 
-The API has CORS enabled via [`flask-cors`](app.py:14), allowing cross-origin requests from any domain. This enables frontend applications to communicate with the API from different origins.
+The API has CORS enabled via [`flask-cors`](app.py:15), allowing cross-origin requests from any domain. This enables frontend applications to communicate with the API from different origins.
 
 ---
 
@@ -498,5 +506,5 @@ console.log(result);
 
 ## Version
 
-- **API Version**: 1.0
-- **Last Updated**: February 2026
+- **API Version**: 2.0
+- **Last Updated**: June 2026

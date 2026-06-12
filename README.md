@@ -133,9 +133,9 @@ Heart disease is one of the leading causes of death worldwide. Early and accurat
 | Machine Learning | scikit-learn | 1.8.0 |
 | Data Processing | pandas, NumPy | 3.0.0, 2.4.1 |
 | CORS | flask-cors | 6.0.2 |
-| Model Explainability | SHAP | 0.45.0 |
+| Model Explainability | SHAP | 0.46.0 |
 | AI Integration | Google Generative AI | - |
-| Environment Variables | python-dotenv | 1.0.0 |
+| Environment Variables | python-dotenv | - |
 
 ### Frontend
 | Component | Technology | Version |
@@ -211,6 +211,7 @@ Ensure you have the following installed:
    - `log_reg_model.pkl` - Logistic Regression model
    - `rfc_model.pkl` - Random Forest model
    - `ann_accuracy.pkl`, `lr_accuracy.pkl`, `rf_accuracy.pkl` - Accuracy metrics
+   - `ann_shap_samples.pkl` - SHAP background samples used for explainability
 
 ### Frontend Setup
 
@@ -282,7 +283,7 @@ Ensure you have the following installed:
 
 1. **Start the Streamlit application:**
    ```bash
-   cd model_development
+   cd backend
    streamlit run dashboard.py
    ```
 
@@ -411,8 +412,9 @@ The system implements **SHAP (SHapley Additive exPlanations)** to provide interp
 
 **How It Works:**
 
-- Uses `shap.TreeExplainer` on the Random Forest model
-- Computes SHAP values for each prediction
+- Uses `shap.KernelExplainer` on the ANN model output probabilities
+- Uses `backend/Models/ann_shap_samples.pkl` as the SHAP background dataset
+- Computes SHAP values for the predicted ANN class per request
 - Extracts top 5 most influential features sorted by absolute SHAP value
 
 **Features Returned per Prediction:**
@@ -706,6 +708,7 @@ FYP/
 │   └── Models/                        # Trained model files
 │       ├── ann_model.pth              # PyTorch ANN weights
 │       ├── ann_accuracy.pkl           # ANN accuracy metric
+│       ├── ann_shap_samples.pkl       # SHAP background samples for ANN explainability
 │       ├── log_reg_model.pkl          # Logistic Regression model
 │       ├── lr_accuracy.pkl            # LR accuracy metric
 │       ├── rfc_model.pkl              # Random Forest model
