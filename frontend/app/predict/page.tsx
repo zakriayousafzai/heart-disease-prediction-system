@@ -4,6 +4,8 @@ import { useState } from "react";
 import axios from "axios";
 import { Spinner } from "@/components/ui/spinner";
 import Image from "next/image";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { FieldTooltip, heartFieldInfo } from "@/components/ui/field-tooltip";
 
 interface RiskFactor {
   feature: string;
@@ -162,207 +164,335 @@ export default function PredictPage() {
           </button>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 text-brand-fg"
-        >
-          {/* Age */}
-          <div>
-            <label className="block font-medium mb-1">Age (years)</label>
-            <input
-              type="number"
-              name="age"
-              value={form.age}
-              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
-              placeholder="e.g. 55"
-              required
-              onChange={handleChange}
-            />
-          </div>
-
-          {/* Sex */}
-          <div>
-            <label className="block font-medium mb-1">Gender</label>
-            <select
-              name="sex"
-              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
-              onChange={handleChange}
-              value={form.sex}
-            >
-              <option className="bg-brand-fg text-brand-bg">Male</option>
-              <option className="bg-brand-fg text-brand-bg">Female</option>
-            </select>
-          </div>
-
-          {/* Chest Pain */}
-          <div>
-            <label className="block font-medium mb-1">Chest Pain Type</label>
-            <select
-              name="chest_pain_type"
-              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
-              onChange={handleChange}
-              value={form.chest_pain_type}
-            >
-              <option className="bg-brand-fg text-brand-bg">
-                Typical Angina
-              </option>
-              <option className="bg-brand-fg text-brand-bg">
-                Atypical Angina
-              </option>
-              <option className="bg-brand-fg text-brand-bg">
-                Non-anginal Pain
-              </option>
-              <option className="bg-brand-fg text-brand-bg">
-                Asymptomatic
-              </option>
-            </select>
-          </div>
-
-          {/* Resting BP */}
-          <div>
-            <label className="block font-medium mb-1">
-              Resting Blood Pressure
-            </label>
-            <input
-              type="number"
-              name="resting_bp"
-              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
-              placeholder="e.g. 140 mmHg"
-              required
-              onChange={handleChange}
-              value={form.resting_bp}
-            />
-          </div>
-
-          {/* Cholesterol */}
-          <div>
-            <label className="block font-medium mb-1">Cholesterol</label>
-            <input
-              type="number"
-              name="cholesterol"
-              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
-              placeholder="e.g. 240 mg/dl"
-              required
-              onChange={handleChange}
-              value={form.cholesterol}
-            />
-          </div>
-
-          {/* Fasting Blood Sugar */}
-          <div>
-            <label className="block font-medium mb-1">
-              Fasting Blood Sugar
-            </label>
-            <select
-              name="fasting_bs"
-              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
-              onChange={handleChange}
-              value={form.fasting_bs}
-            >
-              <option className="bg-brand-fg text-brand-bg">
-                {"<= 120 mg/dl"}
-              </option>
-              <option className="bg-brand-fg text-brand-bg">
-                {"> 120 mg/dl"}
-              </option>
-            </select>
-          </div>
-
-          {/* ECG */}
-          <div>
-            <label className="block font-medium mb-1">Resting ECG</label>
-            <select
-              name="resting_ecg"
-              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
-              onChange={handleChange}
-              value={form.resting_ecg}
-            >
-              <option className="bg-brand-fg text-brand-bg">Normal</option>
-              <option className="bg-brand-fg text-brand-bg">
-                ST-T wave Abnormality
-              </option>
-              <option className="bg-brand-fg text-brand-bg">
-                Left Ventricular Hypertrophy
-              </option>
-            </select>
-          </div>
-
-          {/* Max HR */}
-          <div>
-            <label className="block font-medium mb-1">Maximum Heart Rate</label>
-            <input
-              type="number"
-              name="max_hr"
-              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
-              placeholder="e.g. 160"
-              required
-              onChange={handleChange}
-              value={form.max_hr}
-            />
-          </div>
-
-          {/* Exercise Angina */}
-          <div>
-            <label className="block font-medium mb-1">
-              Exercise Induced Angina
-            </label>
-            <select
-              name="exercise_angina"
-              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
-              onChange={handleChange}
-              value={form.exercise_angina}
-            >
-              <option className="bg-brand-fg text-brand-bg">No</option>
-              <option className="bg-brand-fg text-brand-bg">Yes</option>
-            </select>
-          </div>
-
-          {/* Oldpeak */}
-          <div>
-            <label className="block font-medium mb-1">Oldpeak</label>
-            <input
-              type="number"
-              step="0.1"
-              name="oldpeak"
-              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
-              placeholder="e.g. 1.5"
-              required
-              onChange={handleChange}
-              value={form.oldpeak}
-            />
-          </div>
-
-          {/* ST Slope */}
-          <div>
-            <label className="block font-medium mb-1">ST Slope</label>
-            <select
-              name="st_slope"
-              className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
-              onChange={handleChange}
-              value={form.st_slope}
-            >
-              <option className="bg-brand-fg text-brand-bg">Upsloping</option>
-              <option className="bg-brand-fg text-brand-bg">Flat</option>
-              <option className="bg-brand-fg text-brand-bg">Downsloping</option>
-            </select>
-          </div>
-
-          {/* Submit */}
-          <button
-            type="submit"
-            className="flex justify-center items-center md:col-span-2 mt-4 bg-brand-fg hover:bg-brand-fg/90 text-brand-bg py-3 rounded-xl text-lg font-semibold transition"
-            disabled={loading}
+        <TooltipProvider delayDuration={150} skipDelayDuration={200}>
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6 text-brand-fg"
           >
-            {loading ? (
-              <div className="flex items-center">
-                Analyzing&nbsp;
-                <Image className="max-[630px]:hidden animate-heartbeat" src={"./heart.svg"} height={30} width={30} alt="heart"/>
+            {/* Age */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <label htmlFor="age" className="block font-medium cursor-pointer">
+                  Age (years)
+                </label>
+                <FieldTooltip
+                  label={heartFieldInfo.age.label}
+                  badge={heartFieldInfo.age.badge}
+                  description={heartFieldInfo.age.description}
+                  clinicalNote={heartFieldInfo.age.clinicalNote}
+                />
               </div>
-            ) : (
-              "❤️ Predict Heart Risk"
-            )}
-          </button>
-        </form>
+              <input
+                id="age"
+                type="number"
+                name="age"
+                value={form.age}
+                className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
+                placeholder="e.g. 55"
+                required
+                onChange={handleChange}
+                title={heartFieldInfo.age.description}
+              />
+            </div>
+
+            {/* Sex */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <label htmlFor="sex" className="block font-medium cursor-pointer">
+                  Gender
+                </label>
+                <FieldTooltip
+                  label={heartFieldInfo.sex.label}
+                  badge={heartFieldInfo.sex.badge}
+                  description={heartFieldInfo.sex.description}
+                  clinicalNote={heartFieldInfo.sex.clinicalNote}
+                />
+              </div>
+              <select
+                id="sex"
+                name="sex"
+                className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
+                onChange={handleChange}
+                value={form.sex}
+                title={heartFieldInfo.sex.description}
+              >
+                <option className="bg-brand-fg text-brand-bg">Male</option>
+                <option className="bg-brand-fg text-brand-bg">Female</option>
+              </select>
+            </div>
+
+            {/* Chest Pain */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <label htmlFor="chest_pain_type" className="block font-medium cursor-pointer">
+                  Chest Pain Type
+                </label>
+                <FieldTooltip
+                  label={heartFieldInfo.chest_pain_type.label}
+                  badge={heartFieldInfo.chest_pain_type.badge}
+                  description={heartFieldInfo.chest_pain_type.description}
+                  clinicalNote={heartFieldInfo.chest_pain_type.clinicalNote}
+                />
+              </div>
+              <select
+                id="chest_pain_type"
+                name="chest_pain_type"
+                className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
+                onChange={handleChange}
+                value={form.chest_pain_type}
+                title={heartFieldInfo.chest_pain_type.description}
+              >
+                <option className="bg-brand-fg text-brand-bg">
+                  Typical Angina
+                </option>
+                <option className="bg-brand-fg text-brand-bg">
+                  Atypical Angina
+                </option>
+                <option className="bg-brand-fg text-brand-bg">
+                  Non-anginal Pain
+                </option>
+                <option className="bg-brand-fg text-brand-bg">
+                  Asymptomatic
+                </option>
+              </select>
+            </div>
+
+            {/* Resting BP */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <label htmlFor="resting_bp" className="block font-medium cursor-pointer">
+                  Resting Blood Pressure
+                </label>
+                <FieldTooltip
+                  label={heartFieldInfo.resting_bp.label}
+                  badge={heartFieldInfo.resting_bp.badge}
+                  description={heartFieldInfo.resting_bp.description}
+                  clinicalNote={heartFieldInfo.resting_bp.clinicalNote}
+                />
+              </div>
+              <input
+                id="resting_bp"
+                type="number"
+                name="resting_bp"
+                className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
+                placeholder="e.g. 140 mmHg"
+                required
+                onChange={handleChange}
+                value={form.resting_bp}
+                title={heartFieldInfo.resting_bp.description}
+              />
+            </div>
+
+            {/* Cholesterol */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <label htmlFor="cholesterol" className="block font-medium cursor-pointer">
+                  Cholesterol
+                </label>
+                <FieldTooltip
+                  label={heartFieldInfo.cholesterol.label}
+                  badge={heartFieldInfo.cholesterol.badge}
+                  description={heartFieldInfo.cholesterol.description}
+                  clinicalNote={heartFieldInfo.cholesterol.clinicalNote}
+                />
+              </div>
+              <input
+                id="cholesterol"
+                type="number"
+                name="cholesterol"
+                className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
+                placeholder="e.g. 240 mg/dl"
+                required
+                onChange={handleChange}
+                value={form.cholesterol}
+                title={heartFieldInfo.cholesterol.description}
+              />
+            </div>
+
+            {/* Fasting Blood Sugar */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <label htmlFor="fasting_bs" className="block font-medium cursor-pointer">
+                  Fasting Blood Sugar
+                </label>
+                <FieldTooltip
+                  label={heartFieldInfo.fasting_bs.label}
+                  badge={heartFieldInfo.fasting_bs.badge}
+                  description={heartFieldInfo.fasting_bs.description}
+                  clinicalNote={heartFieldInfo.fasting_bs.clinicalNote}
+                />
+              </div>
+              <select
+                id="fasting_bs"
+                name="fasting_bs"
+                className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
+                onChange={handleChange}
+                value={form.fasting_bs}
+                title={heartFieldInfo.fasting_bs.description}
+              >
+                <option className="bg-brand-fg text-brand-bg">
+                  {"<= 120 mg/dl"}
+                </option>
+                <option className="bg-brand-fg text-brand-bg">
+                  {"> 120 mg/dl"}
+                </option>
+              </select>
+            </div>
+
+            {/* ECG */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <label htmlFor="resting_ecg" className="block font-medium cursor-pointer">
+                  Resting ECG
+                </label>
+                <FieldTooltip
+                  label={heartFieldInfo.resting_ecg.label}
+                  badge={heartFieldInfo.resting_ecg.badge}
+                  description={heartFieldInfo.resting_ecg.description}
+                  clinicalNote={heartFieldInfo.resting_ecg.clinicalNote}
+                />
+              </div>
+              <select
+                id="resting_ecg"
+                name="resting_ecg"
+                className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
+                onChange={handleChange}
+                value={form.resting_ecg}
+                title={heartFieldInfo.resting_ecg.description}
+              >
+                <option className="bg-brand-fg text-brand-bg">Normal</option>
+                <option className="bg-brand-fg text-brand-bg">
+                  ST-T wave Abnormality
+                </option>
+                <option className="bg-brand-fg text-brand-bg">
+                  Left Ventricular Hypertrophy
+                </option>
+              </select>
+            </div>
+
+            {/* Max HR */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <label htmlFor="max_hr" className="block font-medium cursor-pointer">
+                  Maximum Heart Rate
+                </label>
+                <FieldTooltip
+                  label={heartFieldInfo.max_hr.label}
+                  badge={heartFieldInfo.max_hr.badge}
+                  description={heartFieldInfo.max_hr.description}
+                  clinicalNote={heartFieldInfo.max_hr.clinicalNote}
+                />
+              </div>
+              <input
+                id="max_hr"
+                type="number"
+                name="max_hr"
+                className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
+                placeholder="e.g. 160"
+                required
+                onChange={handleChange}
+                value={form.max_hr}
+                title={heartFieldInfo.max_hr.description}
+              />
+            </div>
+
+            {/* Exercise Angina */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <label htmlFor="exercise_angina" className="block font-medium cursor-pointer">
+                  Exercise Induced Angina
+                </label>
+                <FieldTooltip
+                  label={heartFieldInfo.exercise_angina.label}
+                  badge={heartFieldInfo.exercise_angina.badge}
+                  description={heartFieldInfo.exercise_angina.description}
+                  clinicalNote={heartFieldInfo.exercise_angina.clinicalNote}
+                />
+              </div>
+              <select
+                id="exercise_angina"
+                name="exercise_angina"
+                className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
+                onChange={handleChange}
+                value={form.exercise_angina}
+                title={heartFieldInfo.exercise_angina.description}
+              >
+                <option className="bg-brand-fg text-brand-bg">No</option>
+                <option className="bg-brand-fg text-brand-bg">Yes</option>
+              </select>
+            </div>
+
+            {/* Oldpeak */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <label htmlFor="oldpeak" className="block font-medium cursor-pointer">
+                  Oldpeak
+                </label>
+                <FieldTooltip
+                  label={heartFieldInfo.oldpeak.label}
+                  badge={heartFieldInfo.oldpeak.badge}
+                  description={heartFieldInfo.oldpeak.description}
+                  clinicalNote={heartFieldInfo.oldpeak.clinicalNote}
+                />
+              </div>
+              <input
+                id="oldpeak"
+                type="number"
+                step="0.1"
+                name="oldpeak"
+                className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
+                placeholder="e.g. 1.5"
+                required
+                onChange={handleChange}
+                value={form.oldpeak}
+                title={heartFieldInfo.oldpeak.description}
+              />
+            </div>
+
+            {/* ST Slope */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <label htmlFor="st_slope" className="block font-medium cursor-pointer">
+                  ST Slope
+                </label>
+                <FieldTooltip
+                  label={heartFieldInfo.st_slope.label}
+                  badge={heartFieldInfo.st_slope.badge}
+                  description={heartFieldInfo.st_slope.description}
+                  clinicalNote={heartFieldInfo.st_slope.clinicalNote}
+                />
+              </div>
+              <select
+                id="st_slope"
+                name="st_slope"
+                className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 bg-brand-fg/10 border-brand-fg/30"
+                onChange={handleChange}
+                value={form.st_slope}
+                title={heartFieldInfo.st_slope.description}
+              >
+                <option className="bg-brand-fg text-brand-bg">Upsloping</option>
+                <option className="bg-brand-fg text-brand-bg">Flat</option>
+                <option className="bg-brand-fg text-brand-bg">Downsloping</option>
+              </select>
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              className="flex justify-center items-center md:col-span-2 mt-4 bg-brand-fg hover:bg-brand-fg/90 text-brand-bg py-3 rounded-xl text-lg font-semibold transition"
+              disabled={loading}
+            >
+              {loading ? (
+                <div className="flex items-center">
+                  Analyzing&nbsp;
+                  <Image className="max-[630px]:hidden animate-heartbeat" src={"./heart.svg"} height={30} width={30} alt="heart"/>
+                </div>
+              ) : (
+                "❤️ Predict Heart Risk"
+              )}
+            </button>
+          </form>
+        </TooltipProvider>
 
         {/* Result */}
         {result && (
