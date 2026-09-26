@@ -153,15 +153,11 @@ function MetricCard({ title, value, best }: MetricCardProps): JSX.Element {
     backdrop-blur-xl border overflow-hidden
     ${
       best
-        ? "border-green-400 shadow-[0_0_25px_rgba(34,197,94,0.4)]"
+        ? "border-green-400 border-2"
         : "border-white/20"
     }
     bg-black/10`}
   >
-    {/* Glow Effect */}
-    {best && (
-      <div className="absolute inset-0 bg-green-500/10 blur-2xl opacity-40"></div>
-    )}
 
     {/* Title */}
     <h3 className="text-lg font-semibold tracking-wide text-black/90">
@@ -169,19 +165,19 @@ function MetricCard({ title, value, best }: MetricCardProps): JSX.Element {
     </h3>
 
     {/* Accuracy Value */}
-    <p className="text-4xl font-extrabold mt-3 bg-gradient-to-r from-green-600 to-emerald-800 bg-clip-text text-transparent">
+    <p className="text-4xl font-extrabold mt-3">
       {value.toFixed(2)}%
     </p>
 
     {/* Best Badge */}
     {best && (
-      <div className="absolute top-1 right-1 bg-green-500 text-white text-xs px-3 py-1 rounded-full shadow-lg animate-pulse">
-        🏆 Best Model
+      <div className="absolute top-1 right-1 bg-green-500 text-white text-xs px-3 py-1 rounded-full shadow-lg">
+        Best Model
       </div>
     )}
 
     {/* Subtle Bottom Line */}
-    <div className="mt-4 h-[2px] w-24 mx-auto bg-gradient-to-r from-green-500 to-transparent opacity-40 group-hover:opacity-100 transition"></div>
+    <div className="mt-4 h-[2px] w-24 mx-auto bg-gradient-to-r from-gray-500 to-transparent opacity-40"></div>
   </div>
 );
 }
