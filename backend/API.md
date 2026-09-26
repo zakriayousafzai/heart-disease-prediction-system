@@ -200,10 +200,14 @@ POST /predict
 | `rf_prediction` | string | Random Forest prediction: `"Heart Disease Detected"` or `"No Heart Disease Detected"` |
 | `lr_prediction` | string | Logistic Regression prediction: `"Heart Disease Detected"` or `"No Heart Disease Detected"` |
 | `id` | integer | Database ID of the saved patient record |
-| `risk_factors` | array | **(Optional)** Top 5 contributing risk factors based on SHAP analysis. Each factor includes:<br>- `feature`: Feature name (e.g., "Cholesterol")<br>- `value`: Formatted value (e.g., "250 mg/dl")<br>- `impact`: Impact level (`"high"`, `"medium"`, or `"low"`)<br>- `impact_score`: Numerical SHAP importance score (0-1+)<br>- `direction`: `"increases risk"` or `"decreases risk"`<br>- `description`: Human-readable explanation |
+| `baseline_probability` | float | **(Optional)** Predicted-class probability for an average patient, i.e. the mean model output over the SHAP background. SHAP decomposes the reported probability as `baseline_probability + sum of all factor contributions`, so this is the reference the factors are measured against |
+| `other_factors_pp` | float | **(Optional)** Combined signed contribution, in percentage points, of the features not included in `risk_factors`. Present so that `baseline_probability + risk_factors contributions + other_factors_pp` reconciles with `ann_prediction.probability` |
+| `risk_factors` | array | **(Optional)** Top 5 contributing factors, ordered by descending absolute SHAP value. Each factor includes:<br>- `feature`: Feature name (e.g., "Cholesterol")<br>- `value`: Formatted value (e.g., "250 mg/dl")<br>- `impact`: Magnitude band (`"high"`, `"medium"`, or `"low"`), assigned from `relative_importance` against fixed cut-offs of `0.5` and `0.2`. Because the band is a monotonic function of the absolute SHAP value and the factors share one scale, the bands always descend down the list<br>- `impact_label`: Direction-explicit phrase combining magnitude and direction, e.g. `"Strongly increases risk"`, `"Slightly decreases risk"`. A factor that lowers risk is never presented as a risk<br>- `impact_score`: Absolute SHAP value for the predicted class, in probability units<br>- `relative_importance`: SHAP value scaled against the strongest factor in the same prediction, `0-1` (the top factor is always `1.0`). Use this for proportional displays such as bar widths<br>- `contribution_pp`: Signed effect on the predicted-class probability, in percentage points (e.g. `+9.1` or `-6.2`). Its sign always agrees with `direction`<br>- `direction`: `"increases risk"` or `"decreases risk"`<br>- `description`: Human-readable explanation |
 | `recommendations` | array | **(Optional)** AI-generated personalized health recommendations powered by **Google Gemini 2.5 Flash**. The AI receives patient data, prediction results, and SHAP risk factors as context for generating highly personalized advice. Each recommendation includes:<br>- `category`: Type (`"dietary"`, `"medical"`, or `"lifestyle"`)<br>- `icon`: Emoji icon for visual representation<br>- `title`: Recommendation title<br>- `description`: Detailed actionable advice (AI-generated, personalized to patient)<br>- `priority`: Priority level (`"high"`, `"medium"`, or `"low"`) |
 
-**Note:** The `risk_factors` field requires SHAP explainer initialization. The `recommendations` field requires Google Gemini AI (`API_KEY` must be set). If SHAP or Gemini are unavailable, the prediction is still returned without these optional fields.
+**Note:** The `risk_factors`, `baseline_probability` and `other_factors_pp` fields require SHAP explainer initialization. The `recommendations` field requires Google Gemini AI (`API_KEY` must be set). If SHAP or Gemini are unavailable, the prediction is still returned without these optional fields.
+
+**Note on impact bands:** `impact` is deliberately relative to the strongest factor in the *same* response rather than to a per-feature or pooled absolute threshold. A per-feature scale normalises away how much a feature actually matters to the model, which can badge a feature the model barely uses as `"high"` while downgrading the feature it relies on most. Because the band is a monotonic function of `relative_importance`, and the factors are sorted by absolute SHAP value, the bands are guaranteed to descend down the list.
 
 #### Error Response
 
@@ -386,7 +390,9 @@ The following files must be present in the [`Models/`](Models/) directory:
 | `ann_accuracy.pkl` | ANN accuracy metric |
 | `rf_accuracy.pkl` | Random Forest accuracy metric |
 | `lr_accuracy.pkl` | Logistic Regression accuracy metric |
-| `ann_shap_samples.pkl` | SHAP background samples used by `KernelExplainer` |
+| `ann_shap_background.pkl` | Scaled training rows used by `KernelExplainer` as the background (the reference distribution all attributions are measured against, and the source of `baseline_probability`) |
+| `ann_shap_thresholds.json` | Feature names and per-class baseline probabilities. Falls back to `ann_shap_samples.pkl` and built-in feature names if absent. Its per-feature `\|SHAP\|` percentiles are retained for offline analysis and are not used to band `impact` |
+| `ann_shap_samples.pkl` | Scaled samples used for offline SHAP visualisations; legacy fallback background |
 
 ### Installation
 

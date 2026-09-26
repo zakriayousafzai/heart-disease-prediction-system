@@ -6,7 +6,7 @@ python-dotenv
 numpy
 pandas
 scikit-learn
-shap
+shap==0.52.0
 torch
 
 plotly

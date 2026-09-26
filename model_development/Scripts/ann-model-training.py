@@ -207,6 +207,12 @@ pickle.dump(best_acc, open('../Models/ann_accuracy.pkl', 'wb'))
 
 # ========================= SHAP EXPLAINABILITY (KERNEL EXPLAINER) =========================
 
+# NOTE: The artifacts written below are for offline inspection only. The background
+# used by the API is the scaled *training* rows, whereas ann_shap_samples.pkl below is
+# the held-out subset being explained, so the two are not interchangeable. After any
+# retraining, run shap-artifacts.py to regenerate the deployment artifacts
+# (ann_shap_background.pkl and ann_shap_thresholds.json) from the new weights.
+
 # KernelExplainer works with any black-box model, including PyTorch ANNs.
 # It explains predictions by approximating Shapley values around a background dataset.
 model.eval()

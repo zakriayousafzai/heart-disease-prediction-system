@@ -211,7 +211,9 @@ Ensure you have the following installed:
    - `log_reg_model.pkl` - Logistic Regression model
    - `rfc_model.pkl` - Random Forest model
    - `ann_accuracy.pkl`, `lr_accuracy.pkl`, `rf_accuracy.pkl` - Accuracy metrics
-   - `ann_shap_samples.pkl` - SHAP background samples used for explainability
+   - `ann_shap_background.pkl` - SHAP background (scaled training rows) used for explainability
+   - `ann_shap_thresholds.json` - Feature names and per-class baseline probabilities used by the explanations
+   - `ann_shap_samples.pkl` - Scaled samples used for offline SHAP visualisations
 
 ### Frontend Setup
 
@@ -413,9 +415,25 @@ The system implements **SHAP (SHapley Additive exPlanations)** to provide interp
 **How It Works:**
 
 - Uses `shap.KernelExplainer` on the ANN model output probabilities
-- Uses `backend/Models/ann_shap_samples.pkl` as the SHAP background dataset
+- Uses `backend/Models/ann_shap_background.pkl` as the SHAP background dataset: the scaled
+  training rows that every attribution is measured against
 - Computes SHAP values for the predicted ANN class per request
 - Extracts top 5 most influential features sorted by absolute SHAP value
+- Grades each factor against the strongest factor in the same prediction, so `impact`
+  means the same thing for every feature
+
+**Regenerating the explainability artifacts:**
+
+`model_development/Scripts/shap-artifacts.py` rebuilds the SHAP background and metadata
+from the existing `ann_model.pth` and `scaler.pkl`, so model weights and published
+accuracy figures are left untouched. Run it after any ANN retraining:
+
+```bash
+cd model_development/Scripts
+python shap-artifacts.py
+```
+
+Then copy `ann_shap_background.pkl` and `ann_shap_thresholds.json` into `backend/Models/`.
 
 **Features Returned per Prediction:**
 
@@ -423,26 +441,63 @@ The system implements **SHAP (SHapley Additive exPlanations)** to provide interp
 |-------|-------------|
 | `feature` | Clinical feature name |
 | `value` | Patient's value (human-readable format) |
-| `impact` | Impact level (high/medium/low) based on SHAP magnitude |
-| `impact_score` | Numeric SHAP value |
+| `impact` | Magnitude band (high/medium/low) from `relative_importance` |
+| `impact_label` | Direction-explicit phrase, e.g. "Strongly increases risk" |
+| `impact_score` | Numeric SHAP value (absolute contribution to the predicted class probability) |
+| `relative_importance` | SHAP value scaled against the strongest factor in the same prediction, 0-1 |
+| `contribution_pp` | Signed effect on the predicted class probability, in percentage points |
 | `direction` | "increases risk" or "decreases risk" |
 | `description` | Clinical significance of the feature value |
+| `baseline_probability` | Top-level: predicted-class probability for an average patient |
+| `other_factors_pp` | Top-level: combined contribution of the features not in the top 5 |
+
+> **Note**: `impact_score` is a contribution in probability units, so its absolute values
+> are small. Use `relative_importance` when a 0-1 scale is needed, such as for bar widths.
+
+SHAP is additive, so the reported confidence can be checked by hand:
+`baseline_probability + every factor's contribution_pp + other_factors_pp` equals
+`ann_prediction.probability`. Measured across the held-out split, the worst residual is
+**0.05 percentage points**.
 
 **Example Response:**
 ```json
 {
+  "ann_prediction": { "result": "High Risk", "probability": 90.11 },
+  "baseline_probability": 28.49,
+  "other_factors_pp": 4.9,
   "risk_factors": [
     {
-      "feature": "ST Slope",
-      "value": "Downsloping",
+      "feature": "Max Heart Rate",
+      "value": "110 bpm",
       "impact": "high",
-      "impact_score": 0.8234,
+      "impact_label": "Strongly increases risk",
+      "impact_score": 0.4081,
+      "relative_importance": 1.0,
+      "contribution_pp": 40.8,
       "direction": "increases risk",
-      "description": "ST slope is Downsloping (concerning pattern)"
+      "description": "Maximum heart rate of 110 bpm is lower than expected"
     },
     ...
   ]
 }
+```
+
+Reading that example: an average patient sits at 28.5% for High Risk. A maximum heart
+rate of 110 bpm alone adds 40.8 points, and the other factors bring it to 90.1%.
+
+**Why `impact` is relative rather than absolute:** an earlier version graded each factor
+against its own per-feature percentiles. That normalises away how much a feature actually
+matters to the model, so the feature it relies on most could be downgraded while a
+feature it barely uses was badged "high". Grading against the strongest factor in the
+same response keeps one shared scale, and guarantees the bands descend in list order.
+
+**Checking the output:** `backend/test_shap_explanations.py` asserts these invariants
+across the whole held-out split, including that bands never increase down a list, that
+`contribution_pp` signs agree with `direction`, and that the probability reconciles.
+
+```bash
+cd backend
+python test_shap_explanations.py
 ```
 
 **Benefits:**
@@ -708,7 +763,9 @@ FYP/
 │   └── Models/                        # Trained model files
 │       ├── ann_model.pth              # PyTorch ANN weights
 │       ├── ann_accuracy.pkl           # ANN accuracy metric
-│       ├── ann_shap_samples.pkl       # SHAP background samples for ANN explainability
+│       ├── ann_shap_background.pkl    # SHAP background (scaled training rows)
+│       ├── ann_shap_thresholds.json  # Feature names and per-class baselines
+│       ├── ann_shap_samples.pkl       # Scaled samples for offline SHAP plots
 │       ├── log_reg_model.pkl          # Logistic Regression model
 │       ├── lr_accuracy.pkl            # LR accuracy metric
 │       ├── rfc_model.pkl              # Random Forest model
@@ -737,6 +794,8 @@ FYP/
 │   ├── Models/                         # Trained model artifacts
 │   │   ├── ann_model.pth
 │   │   ├── ann_accuracy.pkl
+│   │   ├── ann_shap_background.pkl
+│   │   ├── ann_shap_thresholds.json
 │   │   ├── ann_shap_samples.pkl
 │   │   ├── log_reg_model.pkl
 │   │   ├── lr_accuracy.pkl

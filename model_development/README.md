@@ -59,6 +59,8 @@ model_development/
 |   |-- lr_accuracy.pkl
 |   |-- rfc_model.pkl
 |   |-- rf_accuracy.pkl
+|   |-- ann_shap_background.pkl
+|   |-- ann_shap_thresholds.json
 |   `-- ann_shap_samples.pkl
 |
 `-- Visuals/
@@ -141,6 +143,13 @@ Step 3B: Scripts/ann-model-training.py
 Output: Models/ann_model.pth, Models/scaler.pkl, Models/ann_accuracy.pkl,
         Models/ann_shap_samples.pkl
         (and additional SHAP artifacts, see below)
+
+Step 3C: Scripts/shap-artifacts.py
+Output: Models/ann_shap_background.pkl, Models/ann_shap_thresholds.json,
+        Models/ann_shap_values.pkl, Models/ann_shap_samples.pkl,
+        Models/ann_shap_feature_names.pkl, Models/ann_shap_importance.csv
+        (run after any ANN retraining; rebuilds SHAP artifacts from the
+         existing ann_model.pth without retraining)
 
 Step 4 (optional): dashboard.py
 Command: streamlit run dashboard.py
@@ -284,6 +293,44 @@ Saved outputs (script paths):
 
 ---
 
+### 5. SHAP Artifact Generation
+
+**File:** `Scripts/shap-artifacts.py`
+
+**Purpose:** Rebuild the explainability artifacts from an already-trained ANN. The
+trained weights and the fitted `StandardScaler` are loaded from disk rather than
+retrained, so predictions and the published accuracy figures are unaffected.
+
+The background written here is the file the API explains against. Shapley values are
+only interpretable relative to the distribution they are measured from, so the
+background and the per-class baselines are generated together from the same scaled
+training rows.
+
+The script replays the training split and asserts that the reconstructed split still
+reproduces the fitted scaler's `mean_`/`scale_`, so a changed dataset fails loudly
+instead of silently producing an inconsistent background.
+
+Saved outputs (script paths):
+
+- `../Models/ann_shap_background.pkl` - scaled training rows used as the background
+- `../Models/ann_shap_thresholds.json` - feature names, the expected model output per
+  class (the baseline the API reports), and per-feature per-class \|SHAP\| percentiles
+- `../Models/ann_shap_values.pkl`
+- `../Models/ann_shap_samples.pkl`
+- `../Models/ann_shap_feature_names.pkl`
+- `../Models/ann_shap_importance.csv`
+
+The `per_feature` percentiles in the JSON are kept for offline analysis only. The API
+does **not** use them to grade `impact`: a per-feature scale normalises away how much a
+feature actually matters to the model, so it can badge a feature the model barely uses
+as "high" while downgrading the one it relies on most. The API instead grades each
+factor against the strongest factor in the same prediction.
+
+Copy `ann_shap_background.pkl` and `ann_shap_thresholds.json` into `backend/Models/`
+for the API to pick them up.
+
+---
+
 ## Streamlit Dashboard
 
 **File:** `dashboard.py`
@@ -351,6 +398,8 @@ Typical artifacts:
 - `rfc_model.pkl`
 - `lr_accuracy.pkl`
 - `rf_accuracy.pkl`
+- `ann_shap_background.pkl`
+- `ann_shap_thresholds.json`
 - `ann_shap_samples.pkl`
 
 ---
@@ -361,7 +410,8 @@ Typical artifacts:
 - Use consistent feature encoding between training and inference.
 - Keep scaler and ANN weights together.
 - Keep all model artifacts in `Models/`.
-- Recompute SHAP artifacts after ANN retraining.
+- Recompute SHAP artifacts after ANN retraining, using `Scripts/shap-artifacts.py`
+  rather than retraining the ANN just to refresh the explanations.
 
 ---
 

@@ -183,12 +183,44 @@ class HeartANN(nn.Module):
         x = self.output(x)
         return x
 
-# Feature names mapping for explainability
+# Feature names mapping for explainability. Overwritten below by the names stored
+# alongside the SHAP artifacts when those are available, so the API cannot drift
+# out of sync with the order the model was trained on.
 FEATURE_NAMES = [
     'Age', 'Sex', 'Chest Pain Type', 'Resting Blood Pressure',
     'Cholesterol', 'Fasting Blood Sugar', 'Resting ECG',
     'Max Heart Rate', 'Exercise Angina', 'Oldpeak', 'ST Slope'
 ]
+
+# Feature names and per-class baseline probabilities stored alongside the SHAP
+# artifacts. Loaded below when available so the API cannot drift out of sync with
+# the order the model was trained on.
+SHAP_FEATURE_NAMES = [
+    'Age', 'Sex', 'ChestPainType', 'RestingBP',
+    'Cholesterol', 'FastingBS', 'RestingECG',
+    'MaxHR', 'ExerciseAngina', 'Oldpeak', 'ST_Slope'
+]
+
+# Baseline (expected) model output per risk class, i.e. the predicted-class
+# probability for an average patient. None when the artifact is unavailable.
+SHAP_EXPECTED_VALUE = None
+
+# Impact bands, expressed as a fraction of the strongest factor in the same
+# prediction. Using one shared scale means a magnitude means the same thing for
+# every feature, and because it is a monotonic function of |SHAP| the band always
+# agrees with the order the factors are listed in.
+RELATIVE_IMPACT_CUTOFFS = {'high': 0.5, 'medium': 0.2}
+
+# Human-readable label combining magnitude and direction, so a factor that lowers
+# risk is never presented as if it were a risk.
+IMPACT_LABELS = {
+    ('high', 'increases risk'): 'Strongly increases risk',
+    ('medium', 'increases risk'): 'Moderately increases risk',
+    ('low', 'increases risk'): 'Slightly increases risk',
+    ('high', 'decreases risk'): 'Strongly decreases risk',
+    ('medium', 'decreases risk'): 'Moderately decreases risk',
+    ('low', 'decreases risk'): 'Slightly decreases risk'
+}
 
 # Load all pre-trained machine learning models and preprocessing utilities
 try:
@@ -204,8 +236,37 @@ try:
     log_reg_model = pickle.load(open('./Models/log_reg_model.pkl', 'rb'))
     rfc_model = pickle.load(open('./Models/rfc_model.pkl', 'rb'))
     
-    # Initialize SHAP KernelExplainer for ANN model
-    ann_shap_background = pickle.load(open('./Models/ann_shap_samples.pkl', 'rb'))
+    # Initialize SHAP KernelExplainer for ANN model.
+    # The background is the reference distribution every attribution is measured
+    # against, so it must be the same scaled training data the calibration
+    # percentiles were derived from.
+    try:
+        ann_shap_background = pickle.load(open('./Models/ann_shap_background.pkl', 'rb'))
+    except FileNotFoundError:
+        ann_shap_background = pickle.load(open('./Models/ann_shap_samples.pkl', 'rb'))
+        print("Warning: ann_shap_background.pkl not found. Falling back to "
+              "ann_shap_samples.pkl, which explains predictions against the sample "
+              "set rather than the training distribution.")
+
+    # Feature names and per-class baselines used by the explainability output.
+    # Optional: without it the names above and no baseline are used.
+    try:
+        with open('./Models/ann_shap_thresholds.json') as f:
+            shap_meta = json.load(f)
+        if len(shap_meta['feature_names']) == ann_shap_background.shape[1]:
+            SHAP_FEATURE_NAMES[:] = shap_meta['feature_names']
+            if 'expected_value' in shap_meta:
+                SHAP_EXPECTED_VALUE = {
+                    int(k): float(v) for k, v in shap_meta['expected_value'].items()
+                }
+            print("Loaded SHAP explainability metadata for: "
+                  f"{', '.join(SHAP_FEATURE_NAMES)}")
+        else:
+            print("Warning: ann_shap_thresholds.json feature count does not match the "
+                  "SHAP background. Ignoring metadata.")
+    except (FileNotFoundError, KeyError, ValueError, json.JSONDecodeError):
+        print("Warning: ann_shap_thresholds.json not found. Explanations will use the "
+              "built-in feature names and no baseline probability.")
 
     def ann_predict_proba_fn(data):
         data_t = torch.FloatTensor(data)
@@ -295,19 +356,26 @@ def get_feature_description(feature_idx, patient_data, original_input):
     }
     return descriptions.get(feature_idx, "Clinical parameter")
 
-def categorize_impact(shap_value):
+def categorize_impact(relative_importance):
     """
-    Categorize SHAP importance score into impact levels.
-    
+    Categorize a factor's importance relative to the strongest factor in the same
+    prediction.
+
+    Banding against a single shared scale (rather than per-feature percentiles)
+    is what keeps the band meaningful: a per-feature scale normalises away how much
+    a feature actually matters to the model, so a feature it barely uses can outrank
+    the one it relies on most.
+
     Args:
-        shap_value: Absolute SHAP value
-        
+        relative_importance: |SHAP| as a fraction of the largest |SHAP| in this
+            prediction, where 1.0 is the strongest factor
+
     Returns:
         String: 'high', 'medium', or 'low'
     """
-    if shap_value > 0.5:
+    if relative_importance >= RELATIVE_IMPACT_CUTOFFS['high']:
         return 'high'
-    elif shap_value > 0.2:
+    elif relative_importance >= RELATIVE_IMPACT_CUTOFFS['medium']:
         return 'medium'
     else:
         return 'low'
@@ -339,7 +407,8 @@ def generate_ai_recommendations(original_input, risk_factors, prediction_results
         # Build risk factors text for the prompt
         if risk_factors:
             risk_factors_text = "\n".join([
-                f"  {i+1}. {rf['feature']}: {rf['value']} - {rf['impact']} impact ({rf['direction']})"
+                f"  {i+1}. {rf['feature']}: {rf['value']} - {rf['impact_label']} "
+                f"({rf['contribution_pp']:+.1f} percentage points)"
                 for i, rf in enumerate(risk_factors)
             ])
         else:
@@ -427,6 +496,10 @@ def predict():
     - Logistic Regression: Binary disease detection
     
     Also returns SHAP-based risk factor analysis and Gemini AI-powered recommendations.
+    Each risk factor carries a direction-explicit label and its signed contribution in
+    percentage points of the predicted-class probability, alongside the baseline
+    probability and the residual contribution of the unlisted features, so that
+    baseline + contributions reconciles with the reported probability.
     Saves the patient record and predictions to the database.
     """
     data = request.json
@@ -503,7 +576,7 @@ def predict():
                     shap_arr = np.array(shap_values)
                     if shap_arr.ndim == 3:
                         # Could be (n_samples, n_features, n_classes)
-                        if shap_arr.shape[0] == features_scaled.shape[0]:
+                        if shap_arr.shape[2] == len(categories):
                             raw_shap = shap_arr[0, :, pred_idx].flatten()
                         else:
                             # Could be (n_classes, n_samples, n_features)
@@ -514,25 +587,37 @@ def predict():
                     else:
                         raw_shap = shap_arr.flatten()
                 
-                # Ensure we have a 1D array of length 11 (one per feature)
-                shap_direction = raw_shap[:11]
+                # Ensure we have a 1D array with one entry per feature
+                shap_direction = raw_shap[:len(SHAP_FEATURE_NAMES)]
                 feature_importance = np.abs(shap_direction)
                 
                 # Get top 5 most important features (sorted by absolute SHAP value)
                 top_indices = list(np.argsort(feature_importance)[::-1][:5])
+
+                # Scale each factor against the strongest one in this prediction. This
+                # single shared scale drives both the impact band and the bar width, so
+                # the two can never disagree. Raw SHAP magnitudes are small in absolute
+                # terms because the explained quantity is a probability.
+                max_importance = float(feature_importance[top_indices[0]]) if len(top_indices) else 0.0
                 
                 # Build risk_factors list with detailed information
                 for idx in top_indices:
                     i = int(idx.item()) if hasattr(idx, 'item') else int(idx)
                     impact_score = float(feature_importance[i])
                     direction_value = float(shap_direction[i])
+                    relative = impact_score / max_importance if max_importance else 0.0
+                    impact = categorize_impact(relative)
+                    direction = 'increases risk' if direction_value > 0 else 'decreases risk'
                     
                     risk_factors.append({
                         'feature': FEATURE_NAMES[i],
                         'value': format_feature_value(i, raw_features_df, data),
-                        'impact': categorize_impact(impact_score),
+                        'impact': impact,
+                        'impact_label': IMPACT_LABELS[(impact, direction)],
                         'impact_score': round(impact_score, 4),
-                        'direction': 'increases risk' if direction_value > 0 else 'decreases risk',
+                        'relative_importance': round(relative, 4),
+                        'contribution_pp': round(direction_value * 100, 1),
+                        'direction': direction,
                         'description': get_feature_description(i, raw_features_df, data)
                     })
                 
@@ -541,6 +626,19 @@ def predict():
                 import traceback
                 traceback.print_exc()
                 risk_factors = []
+
+        # ========================= BASELINE AND RESIDUAL =========================
+        # SHAP is additive: the predicted-class probability equals the average
+        # probability over the background population, plus every feature's signed
+        # contribution. Exposing the baseline and the contribution of the features
+        # that did not make the top 5 makes the displayed factors reconcile exactly
+        # with the headline confidence, so the explanation can be checked by hand.
+        baseline_probability = None
+        other_factors_pp = None
+        if risk_factors and SHAP_EXPECTED_VALUE is not None:
+            baseline_probability = round(SHAP_EXPECTED_VALUE[int(pred_idx)] * 100, 2)
+            shown_pp = sum(f['contribution_pp'] for f in risk_factors)
+            other_factors_pp = round(ann_prob - baseline_probability - shown_pp, 1)
 
         # ========================= GENERATE AI RECOMMENDATIONS =========================
         # Use Gemini AI for personalized recommendations (with rule-based fallback)
@@ -580,6 +678,10 @@ def predict():
         # Add explainability data if available
         if risk_factors:
             response_data["risk_factors"] = risk_factors
+        if baseline_probability is not None:
+            response_data["baseline_probability"] = baseline_probability
+        if other_factors_pp is not None:
+            response_data["other_factors_pp"] = other_factors_pp
         if recommendations:
             response_data["recommendations"] = recommendations
             

@@ -11,7 +11,10 @@ interface RiskFactor {
   feature: string;
   value: string;
   impact: string;
+  impact_label?: string;
   impact_score: number;
+  relative_importance?: number;
+  contribution_pp?: number;
   direction: string;
   description: string;
 }
@@ -33,6 +36,8 @@ interface PredictionResult {
   lr_prediction: string;
   id: number;
   risk_factors?: RiskFactor[];
+  baseline_probability?: number;
+  other_factors_pp?: number;
   recommendations?: Recommendation[];
 }
 
@@ -88,13 +93,13 @@ export default function PredictPage() {
     }
   };
 
-  const getImpactColor = (impact: string) => {
-    switch (impact) {
-      case "high":
+  // Colour encodes direction, not magnitude: a factor that lowers risk is always
+  // green even when it moved the prediction a lot.
+  const getImpactColor = (direction: string) => {
+    switch (direction) {
+      case "increases risk":
         return "text-red-600";
-      case "medium":
-        return "text-yellow-600";
-      case "low":
+      case "decreases risk":
         return "text-green-600";
       default:
         return "text-gray-600";
@@ -102,14 +107,14 @@ export default function PredictPage() {
   };
 
   const getImpactIcon = (impact: string, direction: string) => {
-    if (direction === "decreases risk") return "✅";
+    // Green already carries "protective", so severity for those factors is
+    // conveyed by the label rather than a second, conflicting colour.
+    if (direction === "decreases risk") return "🟢";
     switch (impact) {
       case "high":
         return "🔴";
       case "medium":
         return "🟡";
-      case "low":
-        return "🟢";
       default:
         return "⚪";
     }
@@ -528,6 +533,30 @@ export default function PredictPage() {
                   These are the top contributing factors based on your clinical
                   data:
                 </p>
+                {result.baseline_probability !== undefined && (
+                  <p className="text-sm mb-4 text-brand-fg/70">
+                    An average patient sits at{" "}
+                    <span className="font-semibold">
+                      {result.baseline_probability.toFixed(1)}%
+                    </span>{" "}
+                    for {result.ann_prediction.result}. The factors below moved it
+                    to{" "}
+                    <span className="font-semibold">
+                      {result.ann_prediction.probability.toFixed(1)}%
+                    </span>
+                    {result.other_factors_pp !== undefined && (
+                      <>
+                        , with{" "}
+                        <span className="font-semibold">
+                          {result.other_factors_pp > 0 ? "+" : ""}
+                          {result.other_factors_pp.toFixed(1)} pp
+                        </span>{" "}
+                        from the remaining factors
+                      </>
+                    )}
+                    .
+                  </p>
+                )}
                 <div className="space-y-4 text-brand-fg">
                   {result.risk_factors.map((factor, idx) => (
                     <div
@@ -547,11 +576,12 @@ export default function PredictPage() {
                           </div>
                         </div>
                         <span
-                          className={`text-sm font-medium capitalize ${getImpactColor(
-                            factor.impact,
+                          className={`text-sm font-medium ${getImpactColor(
+                            factor.direction,
                           )}`}
                         >
-                          {factor.impact} Impact
+                          {factor.impact_label ??
+                            `${factor.impact} Impact`}
                         </span>
                       </div>
                       <p className="text-sm mb-2">{factor.description}</p>
@@ -565,14 +595,21 @@ export default function PredictPage() {
                             }`}
                             style={{
                               width: `${Math.min(
-                                factor.impact_score * 100,
+                                (factor.relative_importance ??
+                                  factor.impact_score) * 100,
                                 100,
                               )}%`,
                             }}
                           ></div>
                         </div>
-                        <span className="text-xs text-brand-fg/60">
-                          {factor.direction}
+                        <span
+                          className={`text-xs font-medium ${getImpactColor(
+                            factor.direction,
+                          )}`}
+                        >
+                          {factor.contribution_pp !== undefined
+                            ? `${factor.contribution_pp > 0 ? "+" : ""}${factor.contribution_pp.toFixed(1)} pp`
+                            : factor.direction}
                         </span>
                       </div>
                     </div>
