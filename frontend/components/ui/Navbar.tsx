@@ -19,7 +19,7 @@ export default function Navbar(): JSX.Element {
     `px-4 py-1 rounded-lg transition ${
       pathname === href
         ? "bg-brand-fg text-brand-bg"
-        : "text-brand-fg hover:shadow-[inset_0px_0px_4px_rgba(0,0,0,0.6)] hover:bg-brand-bg"
+        : "text-brand-fg hover:shadow-[inset_0px_0px_4px_rgba(0,0,0,0.6)] hover:bg-[#c9c6c6]"
     }`;
 
   return (
